@@ -10,8 +10,19 @@ function toHex(bytes: number[]): string {
 }
 
 // Minimal SHA-256 (FIPS 180-4) — enough for RN offline sync
+function utf8Encode(str: string): Uint8Array {
+  const bytes: number[] = [];
+  for (let i = 0; i < str.length; i++) {
+    const c = str.charCodeAt(i);
+    if (c < 0x80) bytes.push(c);
+    else if (c < 0x800) bytes.push(0xc0 | (c >> 6), 0x80 | (c & 0x3f));
+    else bytes.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f));
+  }
+  return new Uint8Array(bytes);
+}
+
 function sha256Bytes(message: string): number[] {
-  const msg = new TextEncoder().encode(message);
+  const msg = utf8Encode(message);
   const K = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1,
     0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,

@@ -56,12 +56,12 @@ async function getGpsPosition(): Promise<{
   return new Promise((resolve, reject) => {
     Geolocation.getCurrentPosition(
       (pos) => {
+        const mockedField = (pos as { mocked?: boolean }).mocked;
         resolve({
           latitude: pos.coords.latitude,
           longitude: pos.coords.longitude,
           accuracy: pos.coords.accuracy,
-          // @ts-expect-error mocked field may exist on Android
-          isMock: pos.mocked === true,
+          isMock: mockedField === true,
         });
       },
       (err) => reject(new Error(`GPS_ERROR: ${err.message}`)),
@@ -80,7 +80,7 @@ async function scanWifiWithRetry(): Promise<{ bssid: string | null; ssid: string
       // ignore, retry
     }
     if (attempt < WIFI_RETRY - 1) {
-      await new Promise((r) => setTimeout(r, WIFI_RETRY_DELAY_MS));
+      await new Promise<void>((r) => setTimeout(() => r(), WIFI_RETRY_DELAY_MS));
     }
   }
   return { bssid: null, ssid: null };
