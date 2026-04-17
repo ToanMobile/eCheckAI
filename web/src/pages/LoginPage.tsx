@@ -35,7 +35,7 @@ export function LoginPage(): JSX.Element {
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: 'admin@smartattendance.vn', password: 'Admin@2025!' },
+    defaultValues: { email: 'admin@smartattendance.vn', password: 'SuperAdmin@2025!' },
   });
 
   async function onSubmit(data: LoginFormData): Promise<void> {

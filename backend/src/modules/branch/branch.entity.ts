@@ -24,16 +24,16 @@ export class Branch {
   address!: string;
 
   /** Latitude of branch center */
-  @Column({ name: 'lat', type: 'decimal', precision: 10, scale: 7 })
-  lat!: number;
+  @Column({ name: 'latitude', type: 'decimal', precision: 10, scale: 8 })
+  latitude!: number;
 
   /** Longitude of branch center */
-  @Column({ name: 'lng', type: 'decimal', precision: 10, scale: 7 })
-  lng!: number;
+  @Column({ name: 'longitude', type: 'decimal', precision: 11, scale: 8 })
+  longitude!: number;
 
   /** Allowed GPS radius in meters */
-  @Column({ name: 'radius', type: 'int', default: 100 })
-  radius!: number;
+  @Column({ name: 'radius_meters', type: 'int', default: 100 })
+  radiusMeters!: number;
 
   /**
    * Array of allowed WiFi BSSIDs (e.g. ["AA:BB:CC:DD:EE:FF"])
@@ -48,12 +48,6 @@ export class Branch {
 
   @Column({ name: 'is_active', default: true })
   isActive!: boolean;
-
-  @Column({ name: 'manager_id', nullable: true, type: 'uuid' })
-  managerId!: string | null;
-
-  @Column({ name: 'phone_number', nullable: true, type: 'varchar', length: 20 })
-  phoneNumber!: string | null;
 
   @Column({ name: 'timezone', length: 50, default: 'Asia/Ho_Chi_Minh' })
   timezone!: string;

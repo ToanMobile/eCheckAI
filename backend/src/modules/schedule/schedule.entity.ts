@@ -10,15 +10,8 @@ import {
 } from 'typeorm';
 import { Branch } from '../branch/branch.entity';
 
-export enum ShiftType {
-  MORNING = 'morning',
-  AFTERNOON = 'afternoon',
-  FULL_DAY = 'full_day',
-  CUSTOM = 'custom',
-}
-
-@Entity('work_schedules')
-@Index('idx_schedules_branch', ['branchId'])
+@Entity('schedules')
+@Index('idx_schedules_branch_id', ['branchId'])
 @Index('idx_schedules_branch_active', ['branchId', 'isActive'])
 export class WorkSchedule {
   @PrimaryGeneratedColumn('uuid')
@@ -31,51 +24,35 @@ export class WorkSchedule {
   @JoinColumn({ name: 'branch_id' })
   branch!: Branch;
 
-  @Column({ name: 'shift_name', length: 50 })
+  @Column({ name: 'name', length: 255 })
   shiftName!: string;
-
-  @Column({
-    name: 'shift_type',
-    type: 'enum',
-    enum: ShiftType,
-    default: ShiftType.FULL_DAY,
-  })
-  shiftType!: ShiftType;
 
   /**
    * Expected check-in time in HH:MM format (Vietnam time)
    * e.g. "08:00"
    */
-  @Column({ name: 'checkin_time', length: 5 })
+  @Column({ name: 'checkin_time', type: 'time' })
   checkinTime!: string;
 
   /**
    * Expected check-out time in HH:MM format (Vietnam time)
    * e.g. "17:30"
    */
-  @Column({ name: 'checkout_time', length: 5 })
+  @Column({ name: 'checkout_time', type: 'time' })
   checkoutTime!: string;
 
   /**
    * Tolerance window in minutes (+/- around schedule time)
-   * e.g. 15 means 08:00 +/- 15min window
    */
   @Column({ name: 'window_minutes', type: 'int', default: 15 })
   windowMinutes!: number;
 
   /**
    * Days of week this schedule is active (ISO: 1=Mon, 7=Sun)
-   * Stored as JSONB array e.g. [1,2,3,4,5]
+   * Stored as integer[] e.g. [1,2,3,4,5]
    */
-  @Column({ name: 'active_days', type: 'jsonb', default: [1, 2, 3, 4, 5] })
+  @Column({ name: 'active_days', type: 'int', array: true, default: [1, 2, 3, 4, 5] })
   activeDays!: number[];
-
-  /**
-   * Maximum late minutes before recording as absent
-   * Default: 60 minutes
-   */
-  @Column({ name: 'max_late_minutes', type: 'int', default: 60 })
-  maxLateMinutes!: number;
 
   @Column({ name: 'is_active', default: true })
   isActive!: boolean;

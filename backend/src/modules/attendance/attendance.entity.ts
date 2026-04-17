@@ -14,15 +14,15 @@ import { Branch } from '../branch/branch.entity';
 export enum AttendanceStatus {
   ON_TIME = 'on_time',
   LATE = 'late',
+  EARLY_LEAVE = 'early_leave',
   ABSENT = 'absent',
-  MANUAL = 'manual',
+  PENDING = 'pending',
 }
 
 export enum CheckType {
   AUTO_CHECKIN = 'auto_checkin',
   AUTO_CHECKOUT = 'auto_checkout',
-  MANUAL_CHECKIN = 'manual_checkin',
-  MANUAL_CHECKOUT = 'manual_checkout',
+  MANUAL = 'manual',
 }
 
 export interface LocationSnapshot {
@@ -81,15 +81,11 @@ export class AttendanceRecord {
   status!: AttendanceStatus;
 
   @Column({
-    name: 'check_type',
+    name: 'type',
     type: 'enum',
     enum: CheckType,
-    nullable: true,
   })
-  checkType!: CheckType | null;
-
-  @Column({ name: 'minutes_late', type: 'int', default: 0 })
-  minutesLate!: number;
+  checkType!: CheckType;
 
   @Column({ name: 'location_snapshot', type: 'jsonb', nullable: true })
   locationSnapshot!: LocationSnapshot | null;
@@ -100,10 +96,10 @@ export class AttendanceRecord {
   @Column({ name: 'schedule_id', type: 'uuid', nullable: true })
   scheduleId!: string | null;
 
-  @Column({ nullable: true, type: 'varchar', length: 500 })
+  @Column({ nullable: true, type: 'text' })
   note!: string | null;
 
-  @Column({ name: 'is_fraud_flagged', default: false })
+  @Column({ name: 'is_flagged', default: false })
   isFraudFlagged!: boolean;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })

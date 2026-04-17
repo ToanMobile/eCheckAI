@@ -2,16 +2,18 @@ import React, { useState } from 'react';
 import {
   Alert, ActivityIndicator, KeyboardAvoidingView,
   Platform, SafeAreaView, StyleSheet, Text,
-  TextInput, TouchableOpacity, View,
+  TextInput, TouchableOpacity, View, Image
 } from 'react-native';
 import { login, fetchBranch, fetchMySchedule } from '../api/attendanceApi';
 import { useAuthStore } from '../store/useAuthStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+const finosIcon = require('../assets/finos-icon.webp');
+
 export default function LoginScreen(): JSX.Element {
   const setAuth = useAuthStore((s) => s.setAuth);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('nv00489@hdbank.vn');
+  const [password, setPassword] = useState('Employee@2025!');
   const [loading, setLoading] = useState(false);
 
   async function onLogin(): Promise<void> {
@@ -23,22 +25,22 @@ export default function LoginScreen(): JSX.Element {
     try {
       const res = await login(email.trim().toLowerCase(), password);
 
-      // Persist tokens
-      await AsyncStorage.setItem('sa:access_token', res.accessToken);
-      await AsyncStorage.setItem('sa:refresh_token', res.refreshToken);
+      // Persist tokens (API now returns snake_case)
+      await AsyncStorage.setItem('sa:access_token', res.access_token);
+      await AsyncStorage.setItem('sa:refresh_token', res.refresh_token);
 
       // Fetch branch config
       let branch = null;
-      if (res.employee.branchId) {
+      if (res.employee.branch_id) {
         try {
-          const b = await fetchBranch(res.employee.branchId);
+          const b = await fetchBranch(res.employee.branch_id);
           branch = {
             id: b.id,
             name: b.name,
             lat: b.latitude,
             lng: b.longitude,
             radius: b.radius_meters,
-            wifi_bssids: b.wifi_bssids,
+            wifi_bssids: b.wifi_bssids ?? [],
           };
         } catch { /* branch optional */ }
       }
@@ -53,11 +55,11 @@ export default function LoginScreen(): JSX.Element {
         {
           id: res.employee.id,
           email: res.employee.email,
-          fullName: res.employee.fullName,
+          fullName: res.employee.full_name,
           role: res.employee.role,
-          branchId: res.employee.branchId,
+          branchId: res.employee.branch_id,
         },
-        res.accessToken,
+        res.access_token,
         branch,
       );
     } catch (e: unknown) {
@@ -74,10 +76,11 @@ export default function LoginScreen(): JSX.Element {
     <SafeAreaView style={s.root}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={s.kav}>
         <View style={s.header}>
-          <View style={s.logoBox}>
-            <Text style={s.logoEmoji}>📍</Text>
-          </View>
-          <Text style={s.appName}>Smart Attendance</Text>
+          <Image source={finosIcon} style={s.finosMark} resizeMode="contain" />
+          <Text style={s.appName}>
+            <Text style={s.appNameFinos}>FinOS </Text>
+            eCheckAI
+          </Text>
           <Text style={s.tagline}>Zero-Touch Auto Check-In</Text>
         </View>
 
@@ -119,7 +122,7 @@ export default function LoginScreen(): JSX.Element {
           </TouchableOpacity>
         </View>
 
-        <Text style={s.foot}>HDBank Smart Attendance System v2.0</Text>
+        <Text style={s.foot}>FinOS eCheckAI System v2.0</Text>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -131,15 +134,11 @@ const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#f0f9fa' },
   kav: { flex: 1, justifyContent: 'center', padding: 28 },
   header: { alignItems: 'center', marginBottom: 36 },
-  logoBox: {
-    width: 72, height: 72, borderRadius: 20,
-    backgroundColor: TEAL, alignItems: 'center', justifyContent: 'center',
-    marginBottom: 14, elevation: 6,
-    shadowColor: TEAL, shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35, shadowRadius: 8,
+  finosMark: {
+    width: 60, height: 60, marginBottom: 12,
   },
-  logoEmoji: { fontSize: 34 },
-  appName: { fontSize: 26, fontWeight: '800', color: '#111', letterSpacing: -0.5 },
+  appName: { fontSize: 28, fontWeight: '800', color: '#0B2D6B', letterSpacing: -0.5 },
+  appNameFinos: { color: '#7D8285', fontWeight: '600' },
   tagline: { marginTop: 4, color: TEAL, fontWeight: '600', fontSize: 13 },
   card: {
     backgroundColor: '#fff', borderRadius: 16, padding: 24,
@@ -161,5 +160,5 @@ const s = StyleSheet.create({
   },
   btnOff: { opacity: 0.6 },
   btnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  foot: { marginTop: 28, textAlign: 'center', color: '#9ca3af', fontSize: 12 },
+  foot: { marginTop: 28, textAlign: 'center', color: '#6b7280', fontSize: 12 },
 });

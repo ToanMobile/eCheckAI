@@ -1,276 +1,272 @@
 # eCheckAI V2
 
-Zero-Touch Attendance System for 100 branches and 5,000 employees. Runs silently in the background on employee devices, verifying location (WiFi BSSID + GPS Geofencing) and then recording attendance automatically u2014 no manual tapping required.
+> **Hệ thống chấm công Zero-Touch** — nhân viên không cần chạm vào điện thoại.  
+> Tự động xác minh WiFi BSSID + GPS Geofencing + Anti-fraud 9 lớp, chạy hoàn toàn ngầm.
 
-Built by **Giu1ea3i Phu00e1p Su1ed1**.
+Built by **Giải Pháp Số** · ⏱ **2 days build** · 🏢 **100 chi nhánh · 5.000 nhân viên**
 
 ---
 
-## Architecture Overview
-
 ```
- u250cu2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2510
- u2502                     CLIENTS                          u2502
- u2502  u250cu2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2510  u250cu2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2510              u2502
- u2502  u2502 React Native u2502  u2502 React PWA  u2502              u2502
- u2502  u2502  (Employee)  u2502  u2502  (Manager) u2502              u2502
- u2502  u2514u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2518  u2514u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2518              u2502
- u2514u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u252cu2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2518
-                           u2502 HTTPS / WSS
-                     u250cu2500u2500u2500u2500u2534u2500u2500u2500u2500u2510
-                     u2502  Nginx   u2502   :80 u2192 :443 redirect
-                     u2502 (Proxy) u2502   :443 TLS termination
-                     u2514u2500u2500u2500u2500u252cu2500u2500u2500u2518
-                          u2502
-           u250cu2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u253cu2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2510
-           u2502            u2502             u2502
-   u250cu2500u2500u2500u2500u2500u2500u2534u2500u2500u2500u2500u2500u2510   u250cu2500u2500u2500u2500u2500u2500u2500u2534u2500u2500u2500u2500u2500u2510  u2502
-   u2502  NestJS  u2502   u2502  React PWA u2502  u2502
-   u2502  Backend  u2502   u2502  (Nginx)  u2502  u2502
-   u2502  :3000   u2502   u2514u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2518  u2502
-   u2514u2500u2500u252cu2500u2500u2500u252cu2500u2500u2518                      u2502
-      u2502     u2502  WebSocket (Socket.IO) u2500u2518
-      u2502     u2502
- u250cu2500u2500u2500u2500u2534u2500u2500u2510  u250cu2500u2500u2500u2500u2534u2500u2500u2510
- u2502  PG 16 u2502  u2502 Redis 7 u2502
- u2514u2500u2500u2500u2500u2500u2500u2500u2518  u2514u2500u2500u2500u2500u2500u2500u2500u2518
+  5,000 nhân viên         100 chi nhánh        ~7,500 LoC
+  đồng thời check-in      quản lý độc lập      3 platform apps
+  trong 15 phút           WiFi + GPS + ca       Backend · Mobile · Web
 ```
 
-### How auto check-in works
+---
+
+## Vấn đề cần giải quyết
+
+Chấm công thủ công có 3 điểm chết:
+
+| Vấn đề | Thực tế |
+|--------|---------|
+| Quên bấm | Nhân viên bận, không nhớ mở app mỗi sáng |
+| Gian lận | Nhờ đồng nghiệp chấm hộ, chấm từ nhà bằng VPN/GPS giả |
+| Dữ liệu chậm | Manager không biết ai đến ai vắng cho đến tối |
+
+eCheckAI V2 loại bỏ cả ba: **chạy ngầm tự động, chống gian lận đa lớp, realtime dashboard**.
+
+---
+
+## Cách hoạt động
 
 ```
-Background scheduler fires near check-in window
-    u2502
-    u251cu2500u2500 Is today a workday?                  [skip if not]
-    u251cu2500u2500 Is current time within window?        [skip if not]
-    u251cu2500u2500 Scan WiFi u2014 BSSID in branch list?    [fail-fast]
-    u251cu2500u2500 GPS u2014 within branch radius?          [fail-fast]
-    u251cu2500u2500 VPN detected?                         [reject]
-    u251cu2500u2500 Mock location detected?               [reject]
-    u2514u2500u2500 POST /api/v1/attendance/auto-checkin
-            u2502
-            u251cu2500u2500 Server re-validates all conditions
-            u251cu2500u2500 Fraud checks (device ID, rate limit, IP VPN)
-            u251cu2500u2500 Determines status: on_time / late
-            u2514u2500u2500 Persists record + fires WebSocket event
+  Scheduler nền kích hoạt
+  (mỗi 15 phút, không cần mở app)
+           │
+           ├─ Hôm nay có ca làm? ──────── Không → bỏ qua
+           ├─ Đang trong khung giờ? ────── Không → bỏ qua
+           │
+           ├─ WiFi BSSID khớp chi nhánh? ─ Không → log + bỏ qua
+           ├─ GPS trong bán kính? ───────── Không → log + bỏ qua
+           ├─ VPN / Mock GPS? ───────────── Có    → reject + fraud log
+           │
+           └─ POST /attendance/auto-checkin
+                    │
+                    ├─ Server re-validate toàn bộ điều kiện
+                    ├─ Xác định: on_time / late
+                    ├─ Ghi DB + publish WebSocket event
+                    └─ Nhân viên nhận notification ✅ (không cần mở app)
+```
+
+---
+
+## Tính năng
+
+### Zero-Touch Check-in / Check-out
+- Chạy nền bằng **Android WorkManager** / **iOS BGTaskScheduler** — không cần mở app
+- Xác minh **WiFi BSSID** (MAC address) + **GPS Haversine** trước khi gửi API
+- Phân loại tự động: `on_time` / `late` / `absent`
+- Offline-first: mất mạng → lưu SQLite queue → batch sync khi có kết nối lại
+- Idempotency key đảm bảo không bao giờ duplicate record dù sync nhiều lần
+
+### Anti-Fraud 9 lớp
+
+| # | Kiểm tra | Phía | Severity |
+|---|----------|------|----------|
+| 1 | Device binding — chỉ thiết bị đã đăng ký | Server | CRITICAL |
+| 2 | VPN detection — mobile + server IP (ipinfo.io) | Mobile + Server | HIGH |
+| 3 | Mock GPS — emulated location API | Mobile + Server | HIGH |
+| 4 | GPS geofence — Haversine ≤ radius_meters | Both | MEDIUM |
+| 5 | WiFi BSSID — MAC trong whitelist chi nhánh | Both | MEDIUM |
+| 6 | Rate limit — max 2 check-in / ngày / người | Server | HIGH |
+| 7 | Schedule window — ±window_minutes từ giờ vào | Both | — |
+| 8 | GPS accuracy — ≤ 50m required | Server | — |
+| 9 | Device farming — màn hình unlock < 90 phút | Mobile | MEDIUM |
+
+### Realtime Admin Dashboard
+- **WebSocket (Socket.IO)** push event check-in/out/fraud ngay khi xảy ra
+- Role-based rooms: `super_admin` → toàn công ty · `branch_manager` → chi nhánh mình
+- Live feed + biểu đồ trend 7 ngày (Recharts)
+- Fraud log với severity levels + resolution workflow
+
+### Quản lý đa chi nhánh
+- Mỗi chi nhánh config độc lập: BSSID list, GPS center + radius, timezone, ca làm việc
+- Redis cache 6 giờ cho branch config — check-in API không bao giờ hit DB trực tiếp
+- Soft delete an toàn — lịch sử không bao giờ mất
+
+### Export & Notification
+- CSV export tối đa 31 ngày, filter theo chi nhánh / trạng thái / nhân viên
+- **Telegram Bot** + **Zalo OA** + **Email SMTP** — alert trễ, vắng, fraud
+- Báo cáo vắng mặt tự động cuối ngày (cron)
+
+---
+
+## Architecture
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                         CLIENTS                            │
+│  ┌──────────────────┐        ┌────────────────────────┐    │
+│  │  React Native    │        │  React 18 PWA          │    │
+│  │  Android + iOS   │        │  Manager / HR / Admin  │    │
+│  └────────┬─────────┘        └──────────┬─────────────┘    │
+└───────────┼──────────────────────────────┼─────────────────┘
+            │ HTTPS                         │ HTTPS / WSS
+            ▼                               ▼
+     ┌─────────────────────────────────────────────┐
+     │           Nginx  ·  TLS  ·  WS Proxy        │
+     └──────────────────────┬──────────────────────┘
+                            │
+               ┌────────────┴────────────┐
+               ▼                         ▼
+      ┌─────────────────┐      ┌──────────────────┐
+      │  NestJS :3000   │      │  React PWA       │
+      │  REST + WS      │      │  (Nginx static)  │
+      └──┬──────────┬───┘      └──────────────────┘
+         │          │ Redis Pub/Sub
+    ┌────▼───┐  ┌───▼─────┐
+    │  PG 16 │  │ Redis 7 │
+    └────────┘  └─────────┘
+```
+
+### Backend Modules
+
+```
+modules/
+├── auth/           JWT · device registration · OTP reset
+├── employee/       CRUD · 4 roles · device binding
+├── branch/         Config · WiFi/GPS · Redis cache 6h
+├── schedule/       Ca làm · time windows · active days
+├── attendance/     Auto checkin/out · manual · self-service
+│   └── validators/ wifi · geo · schedule
+├── fraud/          Detection · logging · resolution
+├── sync/           Offline batch sync · idempotency dedup
+├── notification/   Telegram · Zalo · Email adapters
+└── realtime/       Socket.IO gateway · Redis pub/sub
 ```
 
 ---
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Backend API | NestJS 10 + TypeScript (strict) |
-| Database | PostgreSQL 16 (TypeORM migrations) |
-| Cache / Pub-Sub | Redis 7 |
-| Auth | JWT (access 15 min / refresh 7 d) |
-| Realtime | Socket.IO (WebSocket) |
-| Mobile | React Native 0.73+ (New Architecture) |
-| Admin Dashboard | React 18 + Vite + Tailwind CSS + shadcn/ui |
-| Reverse Proxy | Nginx (TLS termination, WebSocket upgrade) |
+### Backend
+| | Công nghệ | Chi tiết |
+|--|-----------|---------|
+| Runtime | Node.js 20 LTS | — |
+| Framework | NestJS 10 | TypeScript strict mode |
+| Database | PostgreSQL 16 | TypeORM · migrations · monthly partitioning |
+| Cache | Redis 7 | Branch config · rate limiting · pub/sub |
+| Auth | JWT | Access 15m · Refresh 7d |
+| Realtime | Socket.IO 4 | WebSocket · role-based rooms |
+| Validation | class-validator | DTO decorators trên mọi endpoint |
+| Security | bcrypt 12r · pgcrypto | Password hash · at-rest encryption |
+
+### Mobile
+| | Công nghệ | Chi tiết |
+|--|-----------|---------|
+| Framework | React Native 0.73+ | New Architecture enabled |
+| Background | react-native-background-fetch | WorkManager (Android) · BGTaskScheduler (iOS) |
+| WiFi | react-native-wifi-reborn | BSSID MAC scan |
+| GPS | react-native-geolocation-service | High accuracy · mock detection |
+| Offline DB | react-native-sqlite-storage | Queue persistence |
+| State | Zustand + AsyncStorage | Schedule cache · auth tokens |
+
+### Admin Dashboard
+| | Công nghệ | Chi tiết |
+|--|-----------|---------|
+| Framework | React 18 + Vite | PWA-ready |
+| UI | Tailwind CSS + shadcn/ui | — |
+| Charts | Recharts | Attendance trends · stats |
+| Realtime | Socket.IO Client | Auto-reconnect · role rooms |
+| Data | React Query + Zustand | Server + client state |
+
+### Infrastructure
+| | Công nghệ |
+|--|-----------|
 | Container | Docker + docker-compose |
-| CI/CD | GitHub Actions u2192 GHCR |
+| Proxy | Nginx (TLS termination · WebSocket upgrade) |
+| CI/CD | GitHub Actions → GHCR |
 
 ---
 
-## Prerequisites
+## Scale
 
-- Docker 24+ and docker-compose v2
-- Node.js 20 LTS (for local development without Docker)
-- Git
+### Hiện tại: 5.000 nhân viên · 100 chi nhánh
+- Peak load: 5.000 check-in trong 15 phút = **5,5 req/sec** — single instance xử lý thoải mái
+- Redis cache loại bỏ **90% DB reads** (branch config · schedule · employee lookup)
+- PostgreSQL monthly partitioning sẵn sàng cho dữ liệu lớn
 
----
+### Lên 50.000 nhân viên — không cần viết lại
 
-## Quick Start
-
-### Development (hot reload)
-
-```bash
-# 1. Clone
-git clone https://github.com/your-org/echeck-ai-v2.git
-cd echeck-ai-v2
-
-# 2. Copy env templates
-cp backend/.env.example backend/.env
-cp web/.env.example web/.env
-# Edit both files with your local values
-
-# 3. Start infrastructure (Postgres + Redis) and services
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
-
-# 4. Check logs
-docker-compose logs -f backend
-```
-
-Services in dev mode:
-- Backend API: http://localhost:3000
-- Web PWA: http://localhost:5173
-- Postgres: localhost:5432
-- Redis: localhost:6379
-
-### Production
-
-```bash
-# 1. Copy and fill env
-cp backend/.env.example backend/.env
-cp web/.env.example web/.env
-# Set all secrets: JWT_SECRET (min 64 chars), DB passwords, Telegram token, etc.
-
-# 2. Place TLS certificates
-mkdir -p nginx/ssl
-cp /path/to/cert.pem nginx/ssl/cert.pem
-cp /path/to/key.pem  nginx/ssl/key.pem
-
-# 3. Pull or build images and start stack
-docker-compose pull   # if using pre-built images from GHCR
-docker-compose up -d
-
-# 4. Monitor health
-docker-compose ps
-docker-compose logs -f
-```
-
-Production endpoints:
-- HTTPS: https://smartattendance.vn
-- API: https://smartattendance.vn/api/v1
-- WebSocket: wss://smartattendance.vn/socket.io
+| Bottleneck | Giải pháp đã chuẩn bị |
+|------------|----------------------|
+| API throughput | 3–5 NestJS instances + Nginx upstream |
+| Read load | PostgreSQL read replicas cho dashboard |
+| Data volume | Attendance partitioned by month · auto-prune 2 năm |
+| Cache | Redis Cluster 3 nodes |
+| Notifications | Bull queue async delivery |
+| Observability | Prometheus + Grafana |
 
 ---
 
-## Environment Setup
+## Database
 
-| File | Template | Purpose |
-|---|---|---|
-| `backend/.env` | `backend/.env.example` | NestJS runtime config |
-| `web/.env` | `web/.env.example` | Vite / PWA config |
-| `.env` (root) | `docs/ENV_TEMPLATE.md` u00a7 4 | Docker compose overrides |
+```
+branches          employees          schedules
+   │                  │                  │
+   └──────────────────┴──────────────────┘
+                       │
+              attendance_records          fraud_logs
+              [partitioned/month]         [1 year retention]
+                       │
+                  sync_queue
+                  [idempotency_key UNIQUE]
+```
 
-Key secrets to rotate every 90 days:
-- `JWT_SECRET` u2014 generate with `openssl rand -hex 64`
-- `POSTGRES_PASSWORD` u2014 min 20 chars, store in secret manager
-- `TELEGRAM_BOT_TOKEN`, `IPINFO_API_TOKEN`
+7 tables · 8+ indexes · JSONB cho `location_snapshot`, `device_snapshot`, `fraud_details`
 
 ---
 
-## Running Tests
+## API — 30+ Endpoints
 
-```bash
-# Backend unit tests
-cd backend
-npm ci
-npm run test
-
-# Backend unit tests with coverage
-npm run test -- --coverage
-
-# Backend e2e tests (requires Postgres + Redis running)
-npm run test:e2e
-
-# Web type-check + build
-cd web
-npm ci
-npm run build
+```
+Auth         login · refresh · register-device · forgot/reset-password
+Attendance   auto-checkin · auto-checkout · manual · self-manual
+             my · list · stats · export(CSV) · recent
+Branch       CRUD · soft-delete
+Schedule     CRUD · /my (employee schedule)
+Employee     CRUD · soft-delete
+Sync         batch · status
+Fraud        logs · recent
+Health       /health
 ```
 
-CI runs all tests automatically on every push and pull request to `main` / `develop` branches.
+→ Swagger UI: `http://localhost:3000/api/docs`
 
 ---
 
-## API Documentation
+## Security
 
-Interactive Swagger UI is available at:
-
-```
-http://localhost:3000/api/docs    (development)
-https://smartattendance.vn/api/docs  (production, admin access only)
-```
-
-Key endpoints:
-
-```
-POST   /api/v1/auth/login
-POST   /api/v1/auth/refresh
-
-GET    /api/v1/branches
-POST   /api/v1/branches
-GET    /api/v1/branches/:id
-PUT    /api/v1/branches/:id
-
-GET    /api/v1/schedules/my
-GET    /api/v1/schedules
-POST   /api/v1/schedules
-
-POST   /api/v1/attendance/auto-checkin
-POST   /api/v1/attendance/auto-checkout
-POST   /api/v1/attendance/manual
-GET    /api/v1/attendance
-GET    /api/v1/attendance/stats
-GET    /api/v1/attendance/export    ?branch_id=&date_from=&date_to=
-
-POST   /api/v1/sync/batch
-GET    /api/v1/sync/status
-
-GET    /api/v1/health
-```
+- JWT trong `Authorization: Bearer` — không bao giờ trong URL params
+- BSSID whitelist server-side only — mobile chỉ fetch qua authenticated API
+- Device binding 1-1 per employee — admin reset khi cần
+- Rate limiting: 10 req/phút/người trên attendance endpoints
+- Location data encrypted at rest (pgcrypto)
+- Fraud logs retained 1 năm (compliance)
+- CORS whitelist: PWA domain + mobile bundle ID only
+- TypeORM parameterized queries — no raw SQL concatenation
 
 ---
 
-## Git Flow
+## Tích hợp & Setup
 
-```
-main              u2190 production-ready, protected, SemVer tagged
-u2514u2500u2500 develop       u2190 integration branch
-    u251cu2500u2500 feature/SA-001-db-schema
-    u251cu2500u2500 feature/SA-004-auto-checkin-api
-    u251cu2500u2500 feature/SA-005-fraud-detection
-    u251cu2500u2500 feature/SA-006-background-scheduler
-    u2514u2500u2500 fix/SA-xxx-description
-```
+Xem **[INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md)** để biết chi tiết:
 
-Commit format: `feat(module): description` following Conventional Commits.
-
----
-
-## Scale Strategy
-
-### Current: 5,000 employees / 100 branches
-
-- Single NestJS instance handles peak load comfortably (~5.5 req/sec during 15-minute check-in window)
-- Redis cache eliminates 90% of DB reads (branch config, schedules, employee lookups)
-- PostgreSQL handles all writes with room to spare
-
-### Future: 50,000 employees
-
-| Concern | Solution |
-|---|---|
-| API throughput | Horizontal scale: 3u20135 NestJS instances behind Nginx upstream |
-| Read load | PostgreSQL read replicas for dashboard queries |
-| Write load | Primary PostgreSQL for attendance inserts only |
-| Data volume | Attendance table partitioned by month; prune after 2 years |
-| Cache layer | Redis Cluster (3 nodes) |
-| Notifications | Bull queue (Redis-backed) for async Telegram / Zalo delivery |
-| Static assets | CloudFront / Cloudflare CDN in front of PWA |
-| Observability | Prometheus + Grafana: API latency, error rate, queue depth |
-
----
-
-## Project Structure
-
-```
-smrt-attendance-v2/
-u251cu2500u2500 backend/           # NestJS API (TypeScript strict)
-u251cu2500u2500 web/               # React 18 + Vite PWA (admin dashboard)
-u251cu2500u2500 mobile/            # React Native (employee app)
-u251cu2500u2500 nginx/             # Nginx reverse proxy config + SSL
-u251cu2500u2500 docs/              # Architecture docs, env templates, test cases
-u251cu2500u2500 .github/workflows/ # GitHub Actions CI/CD
-u251cu2500u2500 docker-compose.yml
-u2514u2500u2500 docker-compose.dev.yml
-```
+- Luồng Authentication đầy đủ (login → register device → refresh token)
+- Auto check-in request body + 9-step server validation flow
+- Offline sync với idempotency key + SQLite schema
+- Background Scheduler Android (BackgroundFetch) + iOS (BGTaskScheduler)
+- WebSocket realtime setup + events + role-based rooms
+- CSV export usage
+- Docker quick start (dev + production)
+- Environment variables reference
+- Error codes & timeout handling
+- Postman collection
 
 ---
 
 ## License
 
-Proprietary u2014 Giu1ea3i Phu00e1p Su1ed1 u00a9 2025
+Proprietary — Giải Pháp Số © 2025

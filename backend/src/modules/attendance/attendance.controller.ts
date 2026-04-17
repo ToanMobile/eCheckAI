@@ -117,6 +117,18 @@ export class AttendanceController {
     return this.attendanceService.findAll(query, req.scopedBranchId);
   }
 
+  /** Returns last N check-in/checkout events for dashboard LiveFeed. */
+  @Get('recent')
+  @UseGuards(BranchScopeGuard)
+  @Roles(
+    EmployeeRole.BRANCH_MANAGER,
+    EmployeeRole.HR,
+    EmployeeRole.SUPER_ADMIN,
+  )
+  async findRecent(@Req() req: ScopedRequest) {
+    return this.attendanceService.findRecent(20, req.scopedBranchId ?? undefined);
+  }
+
   @Get('stats')
   @UseGuards(BranchScopeGuard)
   @Roles(

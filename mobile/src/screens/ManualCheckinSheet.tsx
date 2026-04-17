@@ -231,7 +231,7 @@ const s = StyleSheet.create({
     borderBottomWidth: 1, borderColor: '#e5e7eb',
   },
   closeBtn: { padding: 4 },
-  closeTxt: { color: '#6b7280', fontSize: 15 },
+  closeTxt: { color: '#374151', fontSize: 15 },
   title: { fontSize: 16, fontWeight: '700', color: '#111' },
   submitBtn: { padding: 4 },
   submitTxt: { color: TEAL, fontSize: 16, fontWeight: '700' },
@@ -246,7 +246,7 @@ const s = StyleSheet.create({
     borderRadius: 20, backgroundColor: '#f3f4f6', borderWidth: 1.5, borderColor: 'transparent',
   },
   dateChipActive: { backgroundColor: TEAL + '15', borderColor: TEAL },
-  dateChipTxt: { fontSize: 13, color: '#6b7280', fontWeight: '500' },
+  dateChipTxt: { fontSize: 13, color: '#374151', fontWeight: '500' },
   dateChipActiveTxt: { color: TEAL, fontWeight: '700' },
 
   typeRow: { flexDirection: 'row', gap: 10 },
@@ -255,7 +255,7 @@ const s = StyleSheet.create({
     backgroundColor: '#f3f4f6', borderWidth: 1.5, borderColor: 'transparent',
   },
   typeBtnActive: { backgroundColor: TEAL + '15', borderColor: TEAL },
-  typeTxt: { fontSize: 14, color: '#6b7280', fontWeight: '500' },
+  typeTxt: { fontSize: 14, color: '#374151', fontWeight: '500' },
   typeTxtActive: { color: TEAL, fontWeight: '700' },
 
   timeRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -264,7 +264,7 @@ const s = StyleSheet.create({
     width: 70, paddingVertical: 12, textAlign: 'center',
     fontSize: 22, fontWeight: '600', color: '#111',
   },
-  timeSep: { fontSize: 24, fontWeight: '300', color: '#9ca3af' },
+  timeSep: { fontSize: 24, fontWeight: '300', color: '#6b7280' },
 
   noteInput: {
     borderWidth: 1.5, borderColor: '#e5e7eb', borderRadius: 10,

@@ -33,7 +33,10 @@ function monthBounds(year: number, month: number): { from: string; to: string } 
 }
 
 function fmtTime(iso: string | null): string {
-  return iso ? iso.slice(11, 16) : '--:--';
+  if (!iso) return '--:--';
+  return new Date(iso).toLocaleTimeString('en-GB', {
+    timeZone: 'Asia/Ho_Chi_Minh', hour: '2-digit', minute: '2-digit', hour12: false,
+  });
 }
 
 function fmtWorkDate(iso: string): string {
@@ -201,7 +204,7 @@ const s = StyleSheet.create({
   },
   sumItem: { flex: 1, alignItems: 'center' },
   sumValue: { fontSize: 20, fontWeight: '800' },
-  sumLabel: { fontSize: 11, color: '#9ca3af', marginTop: 2 },
+  sumLabel: { fontSize: 11, color: '#4b5563', marginTop: 2 },
 
   tabBar: {
     flexDirection: 'row', backgroundColor: '#fff',
@@ -209,11 +212,11 @@ const s = StyleSheet.create({
   },
   tab: { flex: 1, paddingVertical: 10, alignItems: 'center', borderBottomWidth: 2, borderColor: 'transparent' },
   tabActive: { borderColor: TEAL },
-  tabTxt: { fontSize: 13, color: '#9ca3af', fontWeight: '500' },
+  tabTxt: { fontSize: 13, color: '#4b5563', fontWeight: '500' },
   tabTxtActive: { color: TEAL, fontWeight: '700' },
 
   list: { padding: 16, paddingBottom: 30 },
-  empty: { textAlign: 'center', color: '#9ca3af', marginTop: 40 },
+  empty: { textAlign: 'center', color: '#4b5563', marginTop: 40 },
 
   row: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
@@ -224,9 +227,9 @@ const s = StyleSheet.create({
   rowLeft: { flex: 1, marginRight: 10 },
   rowDate: { fontSize: 14, fontWeight: '700', color: '#111', marginBottom: 4 },
   rowTimes: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  timeChip: { fontSize: 13, color: '#374151', fontVariant: ['tabular-nums'] },
-  timeSep: { fontSize: 12, color: '#9ca3af' },
-  rowNote: { fontSize: 12, color: '#9ca3af', marginTop: 4, fontStyle: 'italic' },
+  timeChip: { fontSize: 13, color: '#111', fontVariant: ['tabular-nums'] },
+  timeSep: { fontSize: 12, color: '#4b5563' },
+  rowNote: { fontSize: 12, color: '#4b5563', marginTop: 4, fontStyle: 'italic' },
   rowRight: { alignItems: 'flex-end', gap: 6 },
   badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
   badgeTxt: { fontSize: 12, fontWeight: '600' },

@@ -177,15 +177,15 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
   employee: {
     id: string;
     email: string;
-    fullName: string;
+    full_name: string;
     role: UserRole;
-    branchId: string | null;
+    branch_id: string | null;
   };
 }
 
@@ -197,6 +197,7 @@ export interface AttendanceFilters {
   search?: string;
   page?: number;
   per_page?: number;
+  limit?: number;
 }
 
 export interface EmployeeFilters {
@@ -206,6 +207,7 @@ export interface EmployeeFilters {
   is_active?: boolean;
   page?: number;
   per_page?: number;
+  limit?: number;
 }
 
 export interface FraudFilters {
@@ -216,6 +218,7 @@ export interface FraudFilters {
   is_resolved?: boolean;
   page?: number;
   per_page?: number;
+  limit?: number;
 }
 
 export interface CreateBranchDto {

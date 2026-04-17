@@ -54,8 +54,12 @@ type CreateEmployeeFormData = z.infer<typeof createEmployeeSchema>;
 async function fetchEmployees(
   filters: EmployeeFilters,
 ): Promise<PaginatedResponse<Employee>['data']> {
+  const params = { ...filters };
+  if (params.branch_id === '') delete params.branch_id;
+  if (params.search === '') delete params.search;
+  
   const { data } = await api.get<PaginatedResponse<Employee>>('/employees', {
-    params: filters,
+    params,
   });
   return data.data;
 }

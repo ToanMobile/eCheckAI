@@ -4,7 +4,6 @@ import {
   IsNumber,
   IsOptional,
   IsString,
-  IsUUID,
   Length,
   Max,
   Min,
@@ -18,26 +17,26 @@ export class UpdateBranchDto {
 
   @IsString()
   @IsOptional()
-  @Length(1, 255)
+  @Length(0, 255)
   address?: string;
 
   @IsNumber()
   @IsOptional()
   @Min(-90)
   @Max(90)
-  lat?: number;
+  latitude?: number;
 
   @IsNumber()
   @IsOptional()
   @Min(-180)
   @Max(180)
-  lng?: number;
+  longitude?: number;
 
   @IsNumber()
   @IsOptional()
   @Min(10)
   @Max(5000)
-  radius?: number;
+  radius_meters?: number;
 
   @IsArray()
   @IsString({ each: true })
@@ -48,15 +47,6 @@ export class UpdateBranchDto {
   @IsString({ each: true })
   @IsOptional()
   wifi_ssids?: string[];
-
-  @IsUUID()
-  @IsOptional()
-  manager_id?: string;
-
-  @IsString()
-  @IsOptional()
-  @Length(1, 20)
-  phone_number?: string;
 
   @IsString()
   @IsOptional()

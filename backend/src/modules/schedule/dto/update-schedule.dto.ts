@@ -3,7 +3,6 @@ import {
   ArrayMinSize,
   IsArray,
   IsBoolean,
-  IsEnum,
   IsInt,
   IsOptional,
   IsString,
@@ -12,17 +11,12 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { ShiftType } from '../schedule.entity';
 
 export class UpdateScheduleDto {
   @IsString()
   @IsOptional()
-  @Length(1, 50)
+  @Length(1, 255)
   shift_name?: string;
-
-  @IsEnum(ShiftType)
-  @IsOptional()
-  shift_type?: ShiftType;
 
   @IsString()
   @IsOptional()
@@ -52,12 +46,6 @@ export class UpdateScheduleDto {
   @Max(7, { each: true })
   @IsOptional()
   active_days?: number[];
-
-  @IsInt()
-  @IsOptional()
-  @Min(0)
-  @Max(480)
-  max_late_minutes?: number;
 
   @IsBoolean()
   @IsOptional()

@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { IsArray, IsEnum, IsNotEmpty, IsObject, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsEnum, IsNotEmpty, IsObject, IsOptional, IsString, IsUUID, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { SyncService, SyncBatchItem } from './sync.service';
 import { SyncEventType } from './sync-queue.entity';
@@ -30,6 +30,15 @@ class SyncBatchItemDto implements SyncBatchItem {
 }
 
 class SyncBatchDto {
+  /**
+   * Mobile clients send employee_id in the body alongside the JWT.
+   * Kept here so forbidNonWhitelisted doesn't reject those requests.
+   * The service always uses the JWT sub claim — this field is never read.
+   */
+  @IsOptional()
+  @IsUUID()
+  employee_id?: string;
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => SyncBatchItemDto)

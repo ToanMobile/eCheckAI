@@ -1,4 +1,4 @@
-import { IsDateString, IsEnum, IsInt, IsOptional, IsUUID, Max, Min } from 'class-validator';
+import { IsDateString, IsEnum, IsInt, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 import { AttendanceStatus } from '../attendance.entity';
 
@@ -6,6 +6,10 @@ export class AttendanceQueryDto {
   @IsOptional()
   @IsUUID()
   branch_id?: string;
+
+  @IsOptional()
+  @IsString()
+  search?: string;
 
   @IsOptional()
   @IsUUID()
@@ -33,6 +37,14 @@ export class AttendanceQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  @Max(50)
+  @Max(200)
   limit?: number = 20;
+
+  /** Alias for limit — sent by portal/mobile as per_page */
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(200)
+  per_page?: number;
 }

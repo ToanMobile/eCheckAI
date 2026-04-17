@@ -1,11 +1,10 @@
 import {
   IsArray,
   IsBoolean,
-  IsNotEmpty,
   IsNumber,
+  IsNotEmpty,
   IsOptional,
   IsString,
-  IsUUID,
   Length,
   Max,
   Min,
@@ -23,25 +22,25 @@ export class CreateBranchDto {
   name!: string;
 
   @IsString()
-  @IsNotEmpty()
-  @Length(1, 255)
-  address!: string;
+  @IsOptional()
+  @Length(0, 255)
+  address?: string;
 
   @IsNumber()
   @Min(-90)
   @Max(90)
-  lat!: number;
+  latitude!: number;
 
   @IsNumber()
   @Min(-180)
   @Max(180)
-  lng!: number;
+  longitude!: number;
 
   @IsNumber()
   @Min(10)
   @Max(5000)
   @IsOptional()
-  radius?: number;
+  radius_meters?: number;
 
   @IsArray()
   @IsString({ each: true })
@@ -52,15 +51,6 @@ export class CreateBranchDto {
   @IsString({ each: true })
   @IsOptional()
   wifi_ssids?: string[];
-
-  @IsUUID()
-  @IsOptional()
-  manager_id?: string;
-
-  @IsString()
-  @IsOptional()
-  @Length(1, 20)
-  phone_number?: string;
 
   @IsString()
   @IsOptional()

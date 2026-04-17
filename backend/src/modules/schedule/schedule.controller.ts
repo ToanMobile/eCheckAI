@@ -14,6 +14,7 @@ import {
 import { ScheduleService } from './schedule.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
+import { PaginationQueryDto } from '../branch/dto/pagination-query.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -32,8 +33,9 @@ export class ScheduleController {
     EmployeeRole.HR,
     EmployeeRole.SUPER_ADMIN,
   )
-  async findByBranch(@Query('branch_id', ParseUUIDPipe) branchId: string) {
-    return this.scheduleService.findByBranch(branchId);
+  async findByBranch(@Query() query: PaginationQueryDto) {
+    const limit = query.per_page ?? query.limit ?? 200;
+    return this.scheduleService.findAll(limit, query.page ?? 1, query.branch_id);
   }
 
   /**

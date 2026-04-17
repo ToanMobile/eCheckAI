@@ -21,7 +21,7 @@ import { StatsCard } from '@/components/ui/StatsCard';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useAttendanceStore } from '@/store/attendance.store';
 import { formatTime } from '@/lib/utils';
-import type { DashboardStats } from '@/types';
+import type { CheckinEvent, DashboardStats } from '@/types';
 
 // ────────────────────────────────────────────────────────────────
 // Data fetching
@@ -32,6 +32,22 @@ async function fetchDashboardStats(): Promise<DashboardStats> {
     '/attendance/stats',
   );
   return data.data;
+}
+
+async function fetchRecentCheckins(): Promise<Partial<CheckinEvent>[]> {
+  const { data } = await api.get<{ data: Array<{
+    id: string; full_name: string; branch_name: string;
+    status: string; check_in: string | null; created_at: string;
+    employee_code?: string;
+  }> }>('/attendance/recent');
+  return data.data.map((r) => ({
+    id: r.id,
+    full_name: r.full_name,
+    employee_code: r.employee_code ?? '',
+    branch_name: r.branch_name,
+    status: r.status as CheckinEvent['status'],
+    timestamp: r.check_in ?? r.created_at,
+  }));
 }
 
 // ────────────────────────────────────────────────────────────────
@@ -71,7 +87,20 @@ function CustomTooltip({
 // ────────────────────────────────────────────────────────────────
 
 function LiveFeed(): JSX.Element {
-  const recentCheckins = useAttendanceStore((s) => s.recentCheckins);
+  const wsCheckins = useAttendanceStore((s) => s.recentCheckins);
+
+  const { data: httpCheckins } = useQuery({
+    queryKey: ['recent-checkins'],
+    queryFn: fetchRecentCheckins,
+    // Stop polling once WebSocket provides live data to avoid redundant calls
+    enabled: wsCheckins.length === 0,
+    refetchInterval: wsCheckins.length === 0 ? 30_000 : false,
+    staleTime: 15_000,
+  });
+
+  // Prefer live WebSocket events; fall back to HTTP-fetched data when WS is empty
+  const recentCheckins: Array<Partial<CheckinEvent>> =
+    wsCheckins.length > 0 ? wsCheckins : (httpCheckins ?? []);
 
   return (
     <div className="card">
@@ -105,7 +134,7 @@ function LiveFeed(): JSX.Element {
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center shrink-0">
                   <span className="text-xs font-semibold text-primary-700">
-                    {event.full_name
+                    {(event.full_name ?? '?')
                       .split(' ')
                       .slice(-2)
                       .map((w) => w[0])
@@ -115,17 +144,17 @@ function LiveFeed(): JSX.Element {
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-neutral-950 truncate">
-                    {event.full_name}
+                    {event.full_name ?? '—'}
                   </p>
                   <p className="text-xs text-neutral-500 truncate">
-                    {event.branch_name}
+                    {event.branch_name ?? '—'}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3 shrink-0 ml-4">
-                <StatusBadge status={event.status} compact />
+                {event.status && <StatusBadge status={event.status} compact />}
                 <span className="font-mono text-xs text-neutral-600">
-                  {formatTime(event.timestamp)}
+                  {event.timestamp ? formatTime(event.timestamp) : '—'}
                 </span>
               </div>
             </div>

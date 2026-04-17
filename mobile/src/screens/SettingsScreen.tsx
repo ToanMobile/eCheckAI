@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 10,
   },
-  rowLabel: { color: '#6b7280', fontSize: 13 },
+  rowLabel: { color: '#374151', fontSize: 13 },
   rowValue: {
     color: '#111',
     fontSize: 13,

@@ -12,8 +12,16 @@ export class PaginationQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  @Max(50)
+  @Max(200)
   limit?: number = 20;
+
+  /** Alias for limit — accepted from portal which sends per_page */
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(200)
+  per_page?: number;
 
   @IsOptional()
   @IsString()

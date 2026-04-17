@@ -223,36 +223,36 @@ const s = StyleSheet.create({
   },
   statIcon: { fontSize: 22, marginBottom: 4 },
   statValue: { fontSize: 24, fontWeight: '800' },
-  statLabel: { fontSize: 11, color: '#9ca3af', marginTop: 2, textAlign: 'center' },
+  statLabel: { fontSize: 11, color: '#4b5563', marginTop: 2, textAlign: 'center' },
 
   card: {
     backgroundColor: '#fff', borderRadius: 14, padding: 18, marginBottom: 12,
     elevation: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05, shadowRadius: 3,
   },
-  cardTitle: { fontSize: 11, fontWeight: '700', color: '#9ca3af', letterSpacing: 0.8, marginBottom: 14 },
+  cardTitle: { fontSize: 11, fontWeight: '700', color: '#4b5563', letterSpacing: 0.8, marginBottom: 14 },
 
   rateRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 10 },
-  rateLabel: { fontSize: 13, color: '#374151', width: 80 },
+  rateLabel: { fontSize: 13, color: '#111', width: 80 },
   rateTrack: { flex: 1, height: 8, backgroundColor: '#f3f4f6', borderRadius: 4, overflow: 'hidden' },
   rateFill: { height: 8, borderRadius: 4 },
   ratePct: { fontSize: 13, fontWeight: '700', width: 42, textAlign: 'right' },
 
   weekChart: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
   weekCol: { flex: 1, alignItems: 'center', gap: 4 },
-  weekCount: { fontSize: 10, color: '#9ca3af' },
+  weekCount: { fontSize: 10, color: '#4b5563' },
   weekBarTrack: { height: 52, justifyContent: 'flex-end' },
   weekBar: { width: 22, borderRadius: 4, minHeight: 4 },
-  weekDay: { fontSize: 11, color: '#6b7280', fontWeight: '600' },
+  weekDay: { fontSize: 11, color: '#374151', fontWeight: '600' },
 
   lateRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingVertical: 10, borderBottomWidth: 1, borderColor: '#f3f4f6',
   },
   lateDate: { fontSize: 14, fontWeight: '600', color: '#111' },
-  lateTime: { fontSize: 12, color: '#6b7280', marginTop: 2 },
+  lateTime: { fontSize: 12, color: '#374151', marginTop: 2 },
   lateBadge: { backgroundColor: '#fef3c7', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
   lateBadgeTxt: { color: '#d97706', fontSize: 12, fontWeight: '700' },
 
-  empty: { textAlign: 'center', color: '#9ca3af', marginTop: 60, fontSize: 14 },
+  empty: { textAlign: 'center', color: '#4b5563', marginTop: 60, fontSize: 14 },
 });

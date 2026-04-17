@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthStore } from '../store/useAuthStore';
-import { fetchMySchedule, ScheduleDetail } from '../api/attendanceApi';
+import { fetchMySchedule, normalizeSchedule, ScheduleDetail } from '../api/attendanceApi';
 import { loadQueue, flush } from '../services/OfflineQueueManager';
 
 const DAY_NAMES = ['', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
@@ -47,10 +47,11 @@ export default function ProfileScreen(): JSX.Element {
     ]);
   }
 
-  const activeDayLabels = schedule?.active_days
-    .sort((a, b) => a - b)
-    .map(d => DAY_NAMES[d] ?? '')
-    .join(', ') ?? '—';
+  const norm = schedule ? normalizeSchedule(schedule) : null;
+  const activeDays = norm?.activeDays ?? norm?.active_days ?? [];
+  const activeDayLabels = activeDays.length
+    ? [...activeDays].sort((a, b) => a - b).map(d => DAY_NAMES[d] ?? '').join(', ')
+    : '—';
 
   return (
     <SafeAreaView style={s.root}>
@@ -76,9 +77,9 @@ export default function ProfileScreen(): JSX.Element {
 
         {/* Lịch làm việc */}
         <SectionCard title="LỊCH LÀM VIỆC">
-          <InfoRow icon="🟢" label="Giờ vào" value={schedule?.checkin_time ?? '—'} mono />
-          <InfoRow icon="🔴" label="Giờ ra" value={schedule?.checkout_time ?? '—'} mono />
-          <InfoRow icon="⏱" label="Khung giờ" value={schedule ? `±${schedule.window_minutes} phút` : '—'} />
+          <InfoRow icon="🟢" label="Giờ vào" value={(norm?.checkin_time ?? norm?.checkinTime ?? '—').slice(0, 5)} mono />
+          <InfoRow icon="🔴" label="Giờ ra" value={(norm?.checkout_time ?? norm?.checkoutTime ?? '—').slice(0, 5)} mono />
+          <InfoRow icon="⏱" label="Khung giờ" value={norm ? `±${norm.window_minutes ?? norm.windowMinutes} phút` : '—'} />
           <InfoRow icon="📆" label="Ngày làm việc" value={activeDayLabels} />
         </SectionCard>
 
@@ -105,7 +106,7 @@ export default function ProfileScreen(): JSX.Element {
           <Text style={[s.actionBtnTxt, { color: '#ef4444' }]}>Đăng xuất</Text>
         </TouchableOpacity>
 
-        <Text style={s.version}>Smart Attendance v2.0 · HDBank</Text>
+        <Text style={s.version}>FinOS eCheckAI v2.0 · HDBank</Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -147,7 +148,7 @@ const s = StyleSheet.create({
   },
   avatarText: { fontSize: 28, color: '#fff', fontWeight: '700' },
   name: { fontSize: 20, fontWeight: '800', color: '#111' },
-  email: { fontSize: 13, color: '#6b7280', marginTop: 2 },
+  email: { fontSize: 13, color: '#374151', marginTop: 2 },
   roleBadge: {
     marginTop: 8, backgroundColor: TEAL + '20',
     paddingHorizontal: 14, paddingVertical: 5, borderRadius: 20,
@@ -160,7 +161,7 @@ const s = StyleSheet.create({
     shadowOpacity: 0.05, shadowRadius: 3,
   },
   sectionTitle: {
-    fontSize: 11, fontWeight: '700', color: '#9ca3af',
+    fontSize: 11, fontWeight: '700', color: '#4b5563',
     letterSpacing: 0.8, marginBottom: 12,
   },
   infoRow: {
@@ -168,7 +169,7 @@ const s = StyleSheet.create({
     paddingVertical: 8, borderBottomWidth: 1, borderColor: '#f9fafb',
   },
   infoIcon: { fontSize: 16, width: 26 },
-  infoLabel: { fontSize: 13, color: '#6b7280', width: 110 },
+  infoLabel: { fontSize: 13, color: '#374151', width: 110 },
   infoValue: { flex: 1, fontSize: 13, color: '#111', fontWeight: '600', textAlign: 'right' },
   infoMono: { fontVariant: ['tabular-nums'], fontSize: 12 },
 
@@ -183,5 +184,5 @@ const s = StyleSheet.create({
   actionBtnIcon: { fontSize: 18 },
   actionBtnTxt: { fontSize: 15, fontWeight: '600', color: TEAL },
 
-  version: { textAlign: 'center', color: '#d1d5db', fontSize: 12, marginTop: 16 },
+  version: { textAlign: 'center', color: '#6b7280', fontSize: 12, marginTop: 16 },
 });

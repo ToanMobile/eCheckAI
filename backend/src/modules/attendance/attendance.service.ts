@@ -201,7 +201,6 @@ export class AttendanceService {
       checkIn: new Date(dto.timestamp),
       status: attendanceStatus,
       checkType: CheckType.AUTO_CHECKIN,
-      minutesLate: scheduleResult.minutesLate,
       scheduleId: schedule.id,
       locationSnapshot: {
         latitude: dto.latitude,
@@ -246,7 +245,7 @@ export class AttendanceService {
       status: attendanceStatus,
       checkInTime: saved.checkIn?.toISOString() ?? dto.timestamp,
       branchName: branch.name,
-      minutesLate: scheduleResult.minutesLate,
+      minutesLate: scheduleResult.minutesLate ?? 0,
     };
   }
 
@@ -345,8 +344,8 @@ export class AttendanceService {
       branchId: employee.branchId ?? '',
       workDate: today,
       checkIn: new Date(dto.timestamp),
-      status: AttendanceStatus.MANUAL,
-      checkType: CheckType.MANUAL_CHECKIN,
+      status: AttendanceStatus.PENDING,
+      checkType: CheckType.MANUAL,
       note: dto.note
         ? `[Manual by ${operatorId}] ${dto.note}`
         : `[Manual by ${operatorId}]`,
@@ -390,8 +389,8 @@ export class AttendanceService {
       workDate: dto.work_date,
       checkIn: dto.check_in ? new Date(dto.check_in) : undefined,
       checkOut: dto.check_out ? new Date(dto.check_out) : undefined,
-      status: AttendanceStatus.MANUAL,
-      checkType: CheckType.MANUAL_CHECKIN,
+      status: AttendanceStatus.PENDING,
+      checkType: CheckType.MANUAL,
       note: `[Chấm bù] ${dto.note}`,
       deviceSnapshot: { device_id: 'self-service', device_model: 'mobile', os_version: '', app_version: '' },
     });
@@ -399,72 +398,147 @@ export class AttendanceService {
     return this.attendanceRepository.save(record);
   }
 
-  /**
-   * Get attendance records for a single employee (self-view).
-   */
+  // ─── Private query helpers ────────────────────────────────────────────────
+
+  /** Builds a WHERE clause + parameter array from attendance filter fields. */
+  private buildWhere(filters: {
+    branchId?: string;
+    employeeId?: string;
+    date_from?: string;
+    date_to?: string;
+    status?: string;
+    search?: string;
+  }): { where: string; params: unknown[] } {
+    const params: unknown[] = [];
+    const conditions: string[] = [];
+
+    if (filters.branchId) {
+      params.push(filters.branchId);
+      conditions.push(`ar.branch_id = $${params.length}`);
+    }
+    if (filters.employeeId) {
+      params.push(filters.employeeId);
+      conditions.push(`ar.employee_id = $${params.length}`);
+    }
+    if (filters.date_from) {
+      params.push(filters.date_from);
+      conditions.push(`ar.work_date >= $${params.length}`);
+    }
+    if (filters.date_to) {
+      params.push(filters.date_to);
+      conditions.push(`ar.work_date <= $${params.length}`);
+    }
+    if (filters.status) {
+      params.push(filters.status);
+      conditions.push(`ar.status = $${params.length}`);
+    }
+    if (filters.search) {
+      params.push(`%${filters.search}%`);
+      conditions.push(`(e.full_name ILIKE $${params.length} OR e.employee_code ILIKE $${params.length})`);
+    }
+
+    return {
+      where: conditions.length ? 'WHERE ' + conditions.join(' AND ') : '',
+      params,
+    };
+  }
+
+  /** Runs a paginated attendance SELECT + COUNT in parallel using a pre-built WHERE clause. */
+  private async runPaginatedAttendanceSql(
+    where: string,
+    params: unknown[],
+    limit: number,
+    skip: number,
+  ): Promise<{ rows: Record<string, unknown>[]; total: number }> {
+    const rowParams = [...params, limit, skip];
+    const [countResult, rows] = await Promise.all([
+      this.attendanceRepository.query(
+        `SELECT COUNT(*) AS total
+         FROM attendance_records ar
+         LEFT JOIN employees e ON e.id = ar.employee_id
+         ${where}`,
+        params,
+      ) as Promise<Array<{ total: string }>>,
+      this.attendanceRepository.query(
+        `SELECT ar.id, ar.employee_id, ar.branch_id, ar.work_date::text AS work_date,
+                ar.check_in, ar.check_out, ar.status, ar.type,
+                ar.note, ar.created_at, ar.updated_at,
+                e.full_name, e.employee_code,
+                b.name AS branch_name
+         FROM attendance_records ar
+         LEFT JOIN employees e ON e.id = ar.employee_id
+         LEFT JOIN branches  b ON b.id = ar.branch_id
+         ${where}
+         ORDER BY ar.work_date DESC, ar.check_in DESC NULLS LAST
+         LIMIT $${rowParams.length - 1} OFFSET $${rowParams.length}`,
+        rowParams,
+      ) as Promise<Record<string, unknown>[]>,
+    ]);
+
+    return { rows, total: parseInt((countResult as Array<{ total: string }>)[0]?.total ?? '0', 10) };
+  }
+
+  // ─── Public query methods ─────────────────────────────────────────────────
+
   async findMine(
     employeeId: string,
     query: AttendanceQueryDto,
-  ): Promise<PaginatedResult<AttendanceRecord>> {
-    return this.findAll({ ...query, employee_id: employeeId }, null);
+  ): Promise<PaginatedResult<Record<string, unknown>>> {
+    const page = query.page ?? 1;
+    const limit = Math.min(query.per_page ?? query.limit ?? 20, 200);
+    const { where, params } = this.buildWhere({
+      employeeId,
+      date_from: query.date_from,
+      date_to: query.date_to,
+      status: query.status,
+    });
+    const { rows, total } = await this.runPaginatedAttendanceSql(where, params, limit, (page - 1) * limit);
+    return { items: rows, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
   async findAll(
     query: AttendanceQueryDto,
     scopedBranchId?: string | null,
-  ): Promise<PaginatedResult<AttendanceRecord>> {
+  ): Promise<PaginatedResult<Record<string, unknown>>> {
     const page = query.page ?? 1;
-    const limit = query.limit ?? 20;
-    const skip = (page - 1) * limit;
+    const limit = Math.min(query.per_page ?? query.limit ?? 50, 200);
+    const { where, params } = this.buildWhere({
+      branchId: scopedBranchId ?? query.branch_id,
+      employeeId: query.employee_id,
+      date_from: query.date_from,
+      date_to: query.date_to,
+      status: query.status,
+      search: query.search,
+    });
+    const { rows, total } = await this.runPaginatedAttendanceSql(where, params, limit, (page - 1) * limit);
+    return { items: rows, total, page, limit, totalPages: Math.ceil(total / limit) };
+  }
 
-    const qb = this.attendanceRepository
-      .createQueryBuilder('ar')
-      .leftJoinAndSelect('ar.employee', 'employee')
-      .leftJoinAndSelect('ar.branch', 'branch');
+  async findRecent(
+    limit = 10,
+    branchId?: string,
+  ): Promise<Record<string, unknown>[]> {
+    const params: unknown[] = [limit];
+    const where = branchId ? `WHERE ar.branch_id = $2` : '';
+    if (branchId) params.push(branchId);
 
-    if (scopedBranchId) {
-      qb.where('ar.branch_id = :branchId', { branchId: scopedBranchId });
-    } else if (query.branch_id) {
-      qb.where('ar.branch_id = :branchId', { branchId: query.branch_id });
-    }
-
-    if (query.employee_id) {
-      qb.andWhere('ar.employee_id = :employeeId', {
-        employeeId: query.employee_id,
-      });
-    }
-
-    if (query.date_from) {
-      qb.andWhere('ar.work_date >= :dateFrom', { dateFrom: query.date_from });
-    }
-
-    if (query.date_to) {
-      qb.andWhere('ar.work_date <= :dateTo', { dateTo: query.date_to });
-    }
-
-    if (query.status) {
-      qb.andWhere('ar.status = :status', { status: query.status });
-    }
-
-    const [items, total] = await qb
-      .orderBy('ar.work_date', 'DESC')
-      .addOrderBy('ar.check_in', 'DESC')
-      .skip(skip)
-      .take(limit)
-      .getManyAndCount();
-
-    return {
-      items,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    };
+    return this.attendanceRepository.query(
+      `SELECT ar.id, ar.work_date::text AS work_date, ar.check_in, ar.check_out,
+              ar.status, ar.type, ar.created_at,
+              e.full_name, e.employee_code,
+              b.name AS branch_name
+       FROM attendance_records ar
+       LEFT JOIN employees e ON e.id = ar.employee_id
+       LEFT JOIN branches  b ON b.id = ar.branch_id
+       ${where}
+       ORDER BY ar.created_at DESC
+       LIMIT $1`,
+      params,
+    ) as Promise<Record<string, unknown>[]>;
   }
 
   /**
-   * Export attendance records as CSV string.
-   * Max 31 days per export per CLAUDE.md spec.
+   * Export as CSV. Max 31 days per call — returns error string if range exceeded.
    */
   async exportCsv(
     branchId?: string,
@@ -473,41 +547,50 @@ export class AttendanceService {
     status?: AttendanceStatus,
     scopedBranchId?: string | null,
   ): Promise<string> {
-    const qb = this.attendanceRepository
-      .createQueryBuilder('ar')
-      .leftJoinAndSelect('ar.employee', 'employee')
-      .leftJoinAndSelect('ar.branch', 'branch')
-      .orderBy('ar.work_date', 'ASC')
-      .addOrderBy('ar.check_in', 'ASC');
-
-    const effectiveBranchId = scopedBranchId ?? branchId;
-    if (effectiveBranchId) {
-      qb.where('ar.branch_id = :branchId', { branchId: effectiveBranchId });
+    if (dateFrom && dateTo) {
+      const diffDays = (new Date(dateTo).getTime() - new Date(dateFrom).getTime()) / 86_400_000;
+      if (diffDays > 31) {
+        return 'error: export range must not exceed 31 days';
+      }
     }
-    if (dateFrom) qb.andWhere('ar.work_date >= :dateFrom', { dateFrom });
-    if (dateTo)   qb.andWhere('ar.work_date <= :dateTo',   { dateTo });
-    if (status)   qb.andWhere('ar.status = :status',       { status });
 
-    const records = await qb.getMany();
+    const { where, params } = this.buildWhere({
+      branchId: scopedBranchId ?? branchId,
+      date_from: dateFrom,
+      date_to: dateTo,
+      status,
+    });
+
+    const records = await this.attendanceRepository.query(
+      `SELECT e.employee_code, e.full_name, b.name AS branch_name,
+              ar.work_date::text AS work_date, ar.check_in, ar.check_out, ar.status, ar.note
+       FROM attendance_records ar
+       LEFT JOIN employees e ON e.id = ar.employee_id
+       LEFT JOIN branches  b ON b.id = ar.branch_id
+       ${where}
+       ORDER BY ar.work_date ASC, ar.check_in ASC NULLS LAST`,
+      params,
+    ) as Array<{
+      employee_code: string; full_name: string; branch_name: string;
+      work_date: string; check_in: string | null; check_out: string | null;
+      status: string; note: string | null;
+    }>;
 
     const escape = (v: string | null | undefined): string =>
       v ? `"${v.replace(/"/g, '""')}"` : '';
 
     const header =
       'employee_code,full_name,branch_name,work_date,check_in,check_out,status,note';
-    const rows = records.map((r) => {
-      const cols = [
-        r.employee?.employeeCode ?? '',
-        escape(r.employee?.fullName),
-        escape(r.branch?.name),
-        r.workDate,
-        r.checkIn ? r.checkIn.toISOString() : '',
-        r.checkOut ? r.checkOut.toISOString() : '',
-        r.status,
-        escape(r.note),
-      ];
-      return cols.join(',');
-    });
+    const rows = records.map((r) => [
+      r.employee_code ?? '',
+      escape(r.full_name),
+      escape(r.branch_name),
+      r.work_date,
+      r.check_in ?? '',
+      r.check_out ?? '',
+      r.status,
+      escape(r.note),
+    ].join(','));
 
     return [header, ...rows].join('\n');
   }
@@ -535,22 +618,28 @@ export class AttendanceService {
       this.employeeService.countActive(),
     ]);
 
-    // 7-day trend
-    const trend = [];
-    for (let i = 6; i >= 0; i--) {
+    // 7-day trend — all days fetched in parallel
+    const days = Array.from({ length: 7 }, (_, i) => {
       const d = new Date();
-      d.setDate(d.getDate() - i);
-      const dateStr = d.toISOString().slice(0, 10);
-      const label = d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
-      const dayQb = baseQb().andWhere('ar.work_date = :d', { d: dateStr });
-      const [t, ot, lt, ab] = await Promise.all([
-        dayQb.getCount(),
-        dayQb.clone().andWhere('ar.status = :s', { s: AttendanceStatus.ON_TIME }).getCount(),
-        dayQb.clone().andWhere('ar.status = :s', { s: AttendanceStatus.LATE }).getCount(),
-        dayQb.clone().andWhere('ar.status = :s', { s: AttendanceStatus.ABSENT }).getCount(),
-      ]);
-      trend.push({ date: label, on_time: ot, late: lt, absent: ab, total: t });
-    }
+      d.setDate(d.getDate() - (6 - i));
+      return {
+        dateStr: d.toISOString().slice(0, 10),
+        label: d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }),
+      };
+    });
+
+    const trend = await Promise.all(
+      days.map(async ({ dateStr, label }) => {
+        const dayQb = baseQb().andWhere('ar.work_date = :d', { d: dateStr });
+        const [t, ot, lt, ab] = await Promise.all([
+          dayQb.getCount(),
+          dayQb.clone().andWhere('ar.status = :s', { s: AttendanceStatus.ON_TIME }).getCount(),
+          dayQb.clone().andWhere('ar.status = :s', { s: AttendanceStatus.LATE }).getCount(),
+          dayQb.clone().andWhere('ar.status = :s', { s: AttendanceStatus.ABSENT }).getCount(),
+        ]);
+        return { date: label, on_time: ot, late: lt, absent: ab, total: t };
+      }),
+    );
 
     return {
       today: {

@@ -7,15 +7,15 @@ export const API_BASE = 'http://localhost:3000/api/v1';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
   employee: {
     id: string;
     email: string;
-    fullName: string;
+    full_name: string;
     role: string;
-    branchId: string | null;
+    branch_id: string | null;
   };
 }
 
@@ -23,17 +23,27 @@ export interface BranchDetail {
   id: string;
   name: string;
   address: string;
+  // API returns snake_case field names
   latitude: number;
   longitude: number;
   radius_meters: number;
   wifi_bssids: string[];
+  wifi_ssids: string[];
+  timezone: string;
+  is_active: boolean;
 }
 
 export interface ScheduleDetail {
-  checkin_time: string;   // HH:mm
-  checkout_time: string;  // HH:mm
+  // API returns snake_case field names
+  checkin_time: string;   // HH:mm:ss
+  checkout_time: string;  // HH:mm:ss
   window_minutes: number;
   active_days: number[];  // 1=Mon … 7=Sun
+  // camelCase aliases for backward compat with cached values
+  checkinTime?: string;
+  checkoutTime?: string;
+  windowMinutes?: number;
+  activeDays?: number[];
 }
 
 export interface AutoCheckinPayload {
@@ -117,10 +127,31 @@ export async function fetchBranch(branchId: string): Promise<BranchDetail> {
 }
 
 export async function fetchMySchedule(): Promise<ScheduleDetail> {
-  const { data } = await getClient().get<{ success: boolean; data: ScheduleDetail }>(
+  const { data } = await getClient().get<{ success: boolean; data: ScheduleDetail | ScheduleDetail[] }>(
     '/schedules/my',
   );
-  return data.data;
+  const raw = Array.isArray(data.data) ? data.data[0] : data.data;
+  return normalizeSchedule(raw);
+}
+
+/** Normalizes a ScheduleDetail to always have both snake_case and camelCase keys. */
+export function normalizeSchedule(s: ScheduleDetail): ScheduleDetail {
+  const checkinTime = s.checkin_time ?? s.checkinTime ?? '';
+  const checkoutTime = s.checkout_time ?? s.checkoutTime ?? '';
+  const windowMinutes = s.window_minutes ?? s.windowMinutes ?? 15;
+  const activeDays = s.active_days ?? s.activeDays ?? [1, 2, 3, 4, 5];
+  return {
+    ...s,
+    checkin_time: checkinTime,
+    checkout_time: checkoutTime,
+    window_minutes: windowMinutes,
+    active_days: activeDays,
+    // camelCase aliases for any code still using them
+    checkinTime,
+    checkoutTime,
+    windowMinutes,
+    activeDays,
+  };
 }
 
 // ─── Auto check-in / check-out ────────────────────────────────────────────────

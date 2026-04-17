@@ -97,6 +97,43 @@ Loop thực tế chạy:
 
 **Self-correcting loop này là trải nghiệm quan trọng nhất** — AI không chỉ sinh code mà còn biết test + fix cho đến khi pass.
 
+### Phase 7 — Demo & Polish (quay video cho client review)
+
+**Prompt 8:**
+> "fix hết các bugs trên mobile sau đó sử dụng mcp chạy toàn bộ các tính năng quay video lại cho tôi y như portal."
+
+Loop thực tế chạy:
+
+1. Audit mobile bugs: phát hiện `Invalid Date` trên clock (Hermes không parse được `new Date().toLocaleString('en-US', {timeZone})`) + UTC time hiển thị thay vì VN time → **Fix** bằng `Intl.DateTimeFormat.formatToParts` với `timeZone: 'Asia/Ho_Chi_Minh'`
+2. Thử `adb shell screenrecord` → ❌ `Encoder failed (err=-38)` (MediaCodec broken trên Apple Silicon arm64 emulator)
+3. Thử `scrcpy --record` → ❌ `IllegalStateException` trong SurfaceEncoder (cùng root cause)
+4. **Workaround**: background loop `adb exec-out screencap -p` bắn PNG vào temp dir, rồi ffmpeg stitch lại ở 2fps → ✅
+5. Orchestrate UI bằng `adb input tap/swipe` với toạ độ đã calibrate cho màn 1080×2280
+
+**Bài học**: khi native tool fail trên emulator non-x86, fallback sang frame-capture loop là reliable nhất. Toạ độ tap calibrate thủ công (tap thử → đọc log → chỉnh) tốn thời gian nhưng chính xác hơn selector-based automation vì RN không expose accessibility tree qua adb.
+
+**Prompt 9:**
+> "quay lại video portal giúp tôi thiếu phần của tab phát hiện gian lận"
+
+AI quên cover 1 route (`/fraud` — `FraudLogsPage`) trong script Playwright. Fix:
+- Grep tìm route: `a[href="/fraud"]`, label "Phát hiện gian lận"
+- Thêm section 6½ vào `scripts/record-portal-demo.mjs`: navigate → scroll → mở severity filter → click row đầu để mở detail modal → đóng
+- Re-run → video mới 5.0MB, đầy đủ 7 tab
+
+**Bài học**: khi auto-generate demo script, luôn đối chiếu với sidebar/router config thay vì liệt kê từ trí nhớ. AI bỏ sót là bình thường — cần 1 pass verify thủ công.
+
+**Prompt 10:**
+> "update lại design mobile tôi thấy nhiều text nó cứ bị gray ko black nhìn không rõ, ngoài ra tôi muốn quay video trong đó có click checkout chứ ko phải checkin,checkout sẵn"
+
+Feedback 2 vấn đề đồng thời — UX + realism của demo:
+
+| Vấn đề | Fix |
+|---|---|
+| Text xám quá nhạt, contrast yếu | `#9ca3af` → `#4b5563`, `#6b7280` → `#374151`, `timeChip`/`rateLabel` → `#111` (replace_all từng file) |
+| Demo video có cả 2 ô check-in/check-out đã pre-seeded, không thấy user action | Pre-script: DELETE today's records, INSERT chỉ 1 check-in (không check-out) → tap CHECK OUT Y=1490 trong video → user thấy spinner + kết quả |
+
+**Bài học**: demo video tốt phải show **interaction**, không phải chỉ show **state**. Pre-seed dữ liệu sao cho user phải tự tap vào button chính — đó mới là thứ stakeholder muốn thấy. Color contrast thì đừng tin mắt mình trên monitor văn phòng — nhân viên dùng ngoài nắng sẽ thấy khác.
+
 ---
 
 ## 3. Review Process
@@ -125,9 +162,10 @@ Loop thực tế chạy:
 | Unit test thời gian | 5.8s (full suite) |
 | Backend build | `tsc` + `nest build` pass trong <10s |
 | Web build | `vite build` pass trong 2.7s, 9 chunks |
-| AI sessions | ~3 sessions, mỗi session 1-2 tiếng |
+| AI sessions | ~5 sessions, mỗi session 1-2 tiếng |
 | Code AI viết vs human-written | 95% AI / 5% human edits (mostly fixes) |
-| Prompts chính | ~15 prompt lớn + ~40 fix/audit prompts |
+| Prompts chính | ~18 prompt lớn + ~45 fix/audit prompts |
+| Demo artifacts | `portal-demo.mp4` (1.4MB, 7 tab) + `mobile-demo.mp4` (406KB, click flow) |
 
 ---
 

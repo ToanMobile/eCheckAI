@@ -41,40 +41,44 @@ export class BranchService {
   ) {}
 
   async findAll(query: PaginationQueryDto): Promise<PaginatedResult<Branch>> {
-    const page = query.page ?? 1;
-    const limit = query.limit ?? 20;
-    const skip = (page - 1) * limit;
+    try {
+      const page = query.page ?? 1;
+      const limit = query.per_page ?? query.limit ?? 20;
+      const skip = (page - 1) * limit;
 
-    const qb = this.branchRepository
-      .createQueryBuilder('branch')
-      .where('branch.deleted_at IS NULL');
+      const qb = this.branchRepository
+        .createQueryBuilder('branch')
+        .where('branch.deletedAt IS NULL');
 
-    if (query.search) {
-      qb.andWhere(
-        '(branch.name ILIKE :search OR branch.code ILIKE :search OR branch.address ILIKE :search)',
-        { search: `%${query.search}%` },
-      );
+      if (query.search) {
+        qb.andWhere(
+          '(branch.name ILIKE :search OR branch.code ILIKE :search OR branch.address ILIKE :search)',
+          { search: `%${query.search}%` },
+        );
+      }
+
+      if (query.status && query.status !== 'all') {
+        qb.andWhere('branch.isActive = :isActive', {
+          isActive: query.status === 'active',
+        });
+      }
+
+      const [items, total] = await qb
+        .orderBy('branch.name', 'ASC')
+        .skip(skip)
+        .take(limit)
+        .getManyAndCount();
+
+      return {
+        items,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      };
+    } catch (e: unknown) {
+      throw new Error('findAll Error: ' + (e instanceof Error ? e.message : String(e)));
     }
-
-    if (query.status && query.status !== 'all') {
-      qb.andWhere('branch.is_active = :isActive', {
-        isActive: query.status === 'active',
-      });
-    }
-
-    const [items, total] = await qb
-      .orderBy('branch.name', 'ASC')
-      .skip(skip)
-      .take(limit)
-      .getManyAndCount();
-
-    return {
-      items,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    };
   }
 
   async findOne(id: string): Promise<Branch> {
@@ -111,21 +115,18 @@ export class BranchService {
     const branch = this.branchRepository.create({
       code: dto.code,
       name: dto.name,
-      address: dto.address,
-      lat: dto.lat,
-      lng: dto.lng,
-      radius: dto.radius ?? 100,
+      address: dto.address ?? '',
+      latitude: dto.latitude,
+      longitude: dto.longitude,
+      radiusMeters: dto.radius_meters ?? 100,
       wifiBssids: dto.wifi_bssids ?? [],
       wifiSsids: dto.wifi_ssids ?? [],
-      managerId: dto.manager_id ?? null,
-      phoneNumber: dto.phone_number ?? null,
       timezone: dto.timezone ?? 'Asia/Ho_Chi_Minh',
       isActive: dto.is_active ?? true,
     });
 
-    const saved = await this.branchRepository.save(branch);
+    const saved = await this.branchRepository.save(branch) as Branch;
 
-    // Cache the new branch
     await this.redis.setex(
       RedisKeys.branch(saved.id),
       RedisTTL.BRANCH,
@@ -141,20 +142,17 @@ export class BranchService {
     const updated = this.branchRepository.merge(branch, {
       ...(dto.name !== undefined && { name: dto.name }),
       ...(dto.address !== undefined && { address: dto.address }),
-      ...(dto.lat !== undefined && { lat: dto.lat }),
-      ...(dto.lng !== undefined && { lng: dto.lng }),
-      ...(dto.radius !== undefined && { radius: dto.radius }),
+      ...(dto.latitude !== undefined && { latitude: dto.latitude }),
+      ...(dto.longitude !== undefined && { longitude: dto.longitude }),
+      ...(dto.radius_meters !== undefined && { radiusMeters: dto.radius_meters }),
       ...(dto.wifi_bssids !== undefined && { wifiBssids: dto.wifi_bssids }),
       ...(dto.wifi_ssids !== undefined && { wifiSsids: dto.wifi_ssids }),
-      ...(dto.manager_id !== undefined && { managerId: dto.manager_id }),
-      ...(dto.phone_number !== undefined && { phoneNumber: dto.phone_number }),
       ...(dto.timezone !== undefined && { timezone: dto.timezone }),
       ...(dto.is_active !== undefined && { isActive: dto.is_active }),
     });
 
-    const saved = await this.branchRepository.save(updated);
+    const saved = await this.branchRepository.save(updated) as Branch;
 
-    // Invalidate cache
     await this.redis.del(RedisKeys.branch(id));
 
     return saved;
@@ -173,9 +171,9 @@ export class BranchService {
     const branch = await this.findOne(id);
     return {
       id: branch.id,
-      lat: Number(branch.lat),
-      lng: Number(branch.lng),
-      radius: branch.radius,
+      lat: Number(branch.latitude),
+      lng: Number(branch.longitude),
+      radius: branch.radiusMeters,
       wifiBssids: branch.wifiBssids,
       wifiSsids: branch.wifiSsids,
       timezone: branch.timezone,

@@ -11,23 +11,38 @@ import ManualCheckinSheet from './ManualCheckinSheet';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+const TZ = 'Asia/Ho_Chi_Minh';
+
 function nowVN(): Date {
-  return new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
+  return new Date();
 }
 
 function fmtTime(date: Date): string {
-  return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  return date.toLocaleTimeString('en-GB', {
+    timeZone: TZ,
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+  });
 }
 
 function fmtDate(date: Date): string {
-  const days = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-  const d = days[date.getDay()] ?? '';
-  return `${d}, ${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: TZ,
+    weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric',
+  }).formatToParts(date);
+  const get = (t: string): string => parts.find(p => p.type === t)?.value ?? '';
+  const weekdayMap: Record<string, string> = {
+    Mon: 'Thứ 2', Tue: 'Thứ 3', Wed: 'Thứ 4', Thu: 'Thứ 5',
+    Fri: 'Thứ 6', Sat: 'Thứ 7', Sun: 'Chủ nhật',
+  };
+  const wd = weekdayMap[get('weekday')] ?? get('weekday');
+  return `${wd}, ${get('day')}/${get('month')}/${get('year')}`;
 }
 
 function fmtIso(iso: string | null): string {
   if (!iso) return '--:--';
-  return iso.slice(11, 16);
+  return new Date(iso).toLocaleTimeString('en-GB', {
+    timeZone: TZ, hour: '2-digit', minute: '2-digit', hour12: false,
+  });
 }
 
 const FAILURE_LABELS: Record<string, string> = {
@@ -260,7 +275,7 @@ const s = StyleSheet.create({
   scroll: { padding: 20, paddingBottom: 40 },
 
   greetRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 },
-  greetSub: { fontSize: 13, color: '#6b7280' },
+  greetSub: { fontSize: 13, color: '#374151' },
   greetName: { fontSize: 20, fontWeight: '800', color: '#111', maxWidth: 200 },
   branchBadge: { backgroundColor: TEAL + '20', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6, maxWidth: 140 },
   branchText: { color: TEAL, fontSize: 12, fontWeight: '700' },
@@ -271,16 +286,16 @@ const s = StyleSheet.create({
     elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4,
   },
   clockTime: { fontSize: 52, fontWeight: '200', color: '#111', letterSpacing: -1, fontVariant: ['tabular-nums'] },
-  clockDate: { marginTop: 4, fontSize: 14, color: '#6b7280', fontWeight: '500' },
+  clockDate: { marginTop: 4, fontSize: 14, color: '#374151', fontWeight: '500' },
 
   card: {
     backgroundColor: '#fff', borderRadius: 14, padding: 18, marginBottom: 16,
     elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4,
   },
-  cardTitle: { fontSize: 11, fontWeight: '700', color: '#9ca3af', letterSpacing: 0.8, marginBottom: 12 },
+  cardTitle: { fontSize: 11, fontWeight: '700', color: '#4b5563', letterSpacing: 0.8, marginBottom: 12 },
   statusRow: { flexDirection: 'row', justifyContent: 'space-between' },
   statusItem: { flex: 1, alignItems: 'center' },
-  statusLabel: { fontSize: 12, color: '#9ca3af', marginBottom: 4 },
+  statusLabel: { fontSize: 12, color: '#4b5563', marginBottom: 4 },
   statusVal: { fontSize: 15, fontWeight: '700' },
   divider: { width: 1, backgroundColor: '#e5e7eb' },
 

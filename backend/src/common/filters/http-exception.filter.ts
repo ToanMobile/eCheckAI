@@ -60,6 +60,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         exception.stack,
         { correlationId: request.correlationId },
       );
+      message = exception.message;
     }
 
     const body: ErrorResponse = {
