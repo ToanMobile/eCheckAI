@@ -42,7 +42,6 @@ export class FraudDetectionService {
 
     const log = this.fraudLogRepository.create({
       employeeId: input.employeeId,
-      branchId: input.branchId ?? null,
       attendanceId: input.attendanceId ?? null,
       fraudType: input.fraudType as FraudType,
       severity: input.severity ?? FraudSeverity.MEDIUM,
@@ -84,9 +83,7 @@ export class FraudDetectionService {
       .createQueryBuilder('fl')
       .orderBy('fl.created_at', 'DESC');
 
-    if (branchId) {
-      qb.where('fl.branch_id = :branchId', { branchId });
-    }
+    void branchId; // branch_id not in fraud_logs table
 
     const [items, total] = await qb
       .skip((page - 1) * limit)

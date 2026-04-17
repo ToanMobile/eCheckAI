@@ -31,12 +31,12 @@ import type {
 const PER_PAGE = 50;
 
 const STATUS_OPTIONS: { value: string; label: string }[] = [
-  { value: '', label: 'Tu1ea5t cu1ea3 tru1ea1ng thu00e1i' },
-  { value: 'on_time', label: 'u0110u00fang giu1edd' },
-  { value: 'late', label: 'Muu1ed9n' },
-  { value: 'early_leave', label: 'Vu1ec1 su1edbm' },
-  { value: 'absent', label: 'Vu1eafng' },
-  { value: 'pending', label: 'Chu1edd xu00e1c nhu1eadn' },
+  { value: '', label: 'Tất cả trạng thái' },
+  { value: 'on_time', label: 'Đúng giờ' },
+  { value: 'late', label: 'Muộn' },
+  { value: 'early_leave', label: 'Về sớm' },
+  { value: 'absent', label: 'Vắng' },
+  { value: 'pending', label: 'Chờ xác nhận' },
 ];
 
 async function fetchAttendance(
@@ -44,7 +44,7 @@ async function fetchAttendance(
 ): Promise<PaginatedResponse<AttendanceRecord>['data']> {
   const params: Record<string, unknown> = {
     page: filters.page ?? 1,
-    per_page: filters.per_page ?? PER_PAGE,
+    limit: filters.limit ?? PER_PAGE,
   };
   if (filters.date_from) params.date_from = filters.date_from;
   if (filters.date_to) params.date_to = filters.date_to;
@@ -64,11 +64,11 @@ async function fetchBranchOptions(): Promise<
 > {
   const { data } = await api.get<{
     data: { items: { id: string; name: string }[] };
-  }>('/branches', { params: { per_page: 200 } });
+  }>('/branches', { params: { limit: 200 } });
   return data.data.items;
 }
 
-// u2500u2500 Sortable column header u2500u2500
+// ── Sortable column header ──
 function SortHeader({
   label,
   sorted,
@@ -99,7 +99,7 @@ function SortHeader({
 const COLUMNS: ColumnDef<AttendanceRecord>[] = [
   {
     accessorKey: 'employee_code',
-    header: 'Mu00e3 NV',
+    header: 'Mã NV',
     cell: ({ getValue }) => (
       <span className="font-mono text-xs text-neutral-600">
         {String(getValue())}
@@ -109,7 +109,7 @@ const COLUMNS: ColumnDef<AttendanceRecord>[] = [
   },
   {
     accessorKey: 'full_name',
-    header: 'Hu1ecd tu00ean',
+    header: 'Họ tên',
     cell: ({ getValue }) => (
       <span className="font-medium text-neutral-950">{String(getValue())}</span>
     ),
@@ -117,44 +117,44 @@ const COLUMNS: ColumnDef<AttendanceRecord>[] = [
   },
   {
     accessorKey: 'branch_name',
-    header: 'Chi nhu00e1nh',
+    header: 'Chi nhánh',
     size: 160,
   },
   {
     accessorKey: 'work_date',
-    header: 'Ngu00e0y',
+    header: 'Ngày',
     cell: ({ getValue }) => formatDate(String(getValue())),
     size: 100,
   },
   {
     accessorKey: 'check_in',
-    header: 'Gu1ecf vu00e0o',
+    header: 'Gỏ vào',
     cell: ({ getValue }) => {
       const val = getValue();
       return val ? (
         <span className="font-mono text-sm">{formatTime(String(val))}</span>
       ) : (
-        <span className="text-neutral-400">u2014</span>
+        <span className="text-neutral-400">—</span>
       );
     },
     size: 80,
   },
   {
     accessorKey: 'check_out',
-    header: 'Gu1ecf ra',
+    header: 'Gỏ ra',
     cell: ({ getValue }) => {
       const val = getValue();
       return val ? (
         <span className="font-mono text-sm">{formatTime(String(val))}</span>
       ) : (
-        <span className="text-neutral-400">u2014</span>
+        <span className="text-neutral-400">—</span>
       );
     },
     size: 80,
   },
   {
     accessorKey: 'status',
-    header: 'Tru1ea1ng thu00e1i',
+    header: 'Trạng thái',
     cell: ({ getValue }) => (
       <StatusBadge status={getValue() as AttendanceStatus} />
     ),
@@ -162,7 +162,7 @@ const COLUMNS: ColumnDef<AttendanceRecord>[] = [
   },
   {
     accessorKey: 'type',
-    header: 'Luu1ea1i',
+    header: 'Luại',
     cell: ({ getValue }) => (
       <span
         className={cn(
@@ -170,20 +170,20 @@ const COLUMNS: ColumnDef<AttendanceRecord>[] = [
           getValue() === 'auto' ? 'text-primary-600' : 'text-neutral-500',
         )}
       >
-        {getValue() === 'auto' ? 'Tu1ef1 u0111u1ed9ng' : 'Thu1ee7 cu00f4ng'}
+        {getValue() === 'auto' ? 'Tự động' : 'Thủ công'}
       </span>
     ),
     size: 90,
   },
   {
     accessorKey: 'note',
-    header: 'Ghi chu00fa',
+    header: 'Ghi chú',
     cell: ({ getValue }) => {
       const val = getValue();
       return val ? (
         <span className="text-xs text-neutral-600 line-clamp-1">{String(val)}</span>
       ) : (
-        <span className="text-neutral-300">u2014</span>
+        <span className="text-neutral-300">—</span>
       );
     },
     size: 160,
@@ -204,7 +204,7 @@ export function AttendancePage(): JSX.Element {
 
   const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: ['attendance', filters, page],
-    queryFn: () => fetchAttendance({ ...filters, page, per_page: PER_PAGE }),
+    queryFn: () => fetchAttendance({ ...filters, page, limit: PER_PAGE }),
     placeholderData: (prev) => prev,
   });
 
@@ -222,10 +222,10 @@ export function AttendancePage(): JSX.Element {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
-    pageCount: data?.total_pages ?? 1,
+    pageCount: data?.totalPages ?? 1,
   });
 
-  const totalPages = data?.total_pages ?? 1;
+  const totalPages = data?.totalPages ?? 1;
 
   const handleFilterChange = useCallback(
     (key: keyof AttendanceFilters, value: string) => {
@@ -265,9 +265,9 @@ export function AttendancePage(): JSX.Element {
       {/* Header */}
       <div className="page-header">
         <div>
-          <h1 className="text-h1">Chu1ea5m cu00f4ng</h1>
+          <h1 className="text-h1">Chấm công</h1>
           <p className="text-body-sm mt-1">
-            {data ? `${data.total.toLocaleString('vi-VN')} bu1ea3n ghi` : 'u0110ang tu1ea3i...'}
+            {data ? `${data.total.toLocaleString('vi-VN')} bản ghi` : 'Đang tải...'}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -276,13 +276,13 @@ export function AttendancePage(): JSX.Element {
             onClick={() => void refetch()}
             disabled={isFetching}
             className="btn-secondary"
-            aria-label="Lu00e0m mu1edbi"
+            aria-label="Làm mới"
           >
             <RefreshCw
               className={cn('w-4 h-4', isFetching && 'animate-spin')}
               aria-hidden="true"
             />
-            Lu00e0m mu1edbi
+            Làm mới
           </button>
           <button
             type="button"
@@ -291,7 +291,7 @@ export function AttendancePage(): JSX.Element {
             className="btn-primary"
           >
             <Download className="w-4 h-4" aria-hidden="true" />
-            {isExporting ? 'u0110ang xu1ea5t...' : 'Xuu1ea5t CSV'}
+            {isExporting ? 'Đang xất...' : 'Xuất CSV'}
           </button>
         </div>
       </div>
@@ -300,7 +300,7 @@ export function AttendancePage(): JSX.Element {
       <div className="card p-4">
         <div className="flex items-center gap-2 mb-3">
           <Filter className="w-4 h-4 text-neutral-500" aria-hidden="true" />
-          <span className="text-sm font-medium text-neutral-700">Bu1ed9 lu1ecdc</span>
+          <span className="text-sm font-medium text-neutral-700">Bộ lọc</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           {/* Search */}
@@ -311,11 +311,11 @@ export function AttendancePage(): JSX.Element {
             />
             <input
               type="text"
-              placeholder="Tu00ecm nhu00e2n viu00ean..."
+              placeholder="Tìm nhân viên..."
               className="input pl-8"
               value={filters.search ?? ''}
               onChange={(e) => handleFilterChange('search', e.target.value)}
-              aria-label="Tu00ecm kiu1ebfm nhu00e2n viu00ean"
+              aria-label="Tìm kiếm nhân viên"
             />
           </div>
 
@@ -326,7 +326,7 @@ export function AttendancePage(): JSX.Element {
               className="input"
               value={filters.date_from ?? ''}
               onChange={(e) => handleFilterChange('date_from', e.target.value)}
-              aria-label="Tu1eeb ngu00e0y"
+              aria-label="Từ ngày"
             />
           </div>
 
@@ -337,7 +337,7 @@ export function AttendancePage(): JSX.Element {
               className="input"
               value={filters.date_to ?? ''}
               onChange={(e) => handleFilterChange('date_to', e.target.value)}
-              aria-label="u0110u1ebfn ngu00e0y"
+              aria-label="Đến ngày"
             />
           </div>
 
@@ -347,9 +347,9 @@ export function AttendancePage(): JSX.Element {
               className="input"
               value={filters.branch_id ?? ''}
               onChange={(e) => handleFilterChange('branch_id', e.target.value)}
-              aria-label="Chi nhu00e1nh"
+              aria-label="Chi nhánh"
             >
-              <option value="">Tu1ea5t cu1ea3 chi nhu00e1nh</option>
+              <option value="">Tất cả chi nhánh</option>
               {branches?.map((b) => (
                 <option key={b.id} value={b.id}>
                   {b.name}
@@ -369,7 +369,7 @@ export function AttendancePage(): JSX.Element {
                   e.target.value as AttendanceStatus,
                 )
               }
-              aria-label="Tru1ea1ng thu00e1i"
+              aria-label="Trạng thái"
             >
               {STATUS_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -433,7 +433,7 @@ export function AttendancePage(): JSX.Element {
                     colSpan={COLUMNS.length}
                     className="px-4 py-16 text-center text-sm text-neutral-500"
                   >
-                    Khu00f4ng cu00f3 du1eef liu1ec7u chu1ea5m cu00f4ng
+                    Không có dữ liệu chấm công
                   </td>
                 </tr>
               ) : (
@@ -463,15 +463,15 @@ export function AttendancePage(): JSX.Element {
         {/* Pagination */}
         <div className="flex items-center justify-between px-4 py-3 border-t border-neutral-200">
           <p className="text-sm text-neutral-500">
-            Hiu1ec3n thu1ecb{' '}
+            Hiển thị{' '}
             <span className="font-medium text-neutral-700">
-              {data ? `${(page - 1) * PER_PAGE + 1}u2013${Math.min(page * PER_PAGE, data.total)}` : '0'}
+              {data ? `${(page - 1) * PER_PAGE + 1}–${Math.min(page * PER_PAGE, data.total)}` : '0'}
             </span>{' '}
             trong{' '}
             <span className="font-medium text-neutral-700">
               {data?.total.toLocaleString('vi-VN') ?? 0}
             </span>{' '}
-            bu1ea3n ghi
+            bản ghi
           </p>
           <div className="flex items-center gap-1">
             <button
@@ -480,7 +480,7 @@ export function AttendancePage(): JSX.Element {
               disabled={page === 1}
               className="btn-secondary px-2 py-1.5 text-xs disabled:opacity-40"
             >
-              u00ab
+              «
             </button>
             <button
               type="button"
@@ -488,7 +488,7 @@ export function AttendancePage(): JSX.Element {
               disabled={page === 1}
               className="btn-secondary px-2 py-1.5 text-xs disabled:opacity-40"
             >
-              u2039
+              ‹
             </button>
             <span className="px-3 py-1.5 text-sm text-neutral-700">
               {page} / {totalPages}
@@ -499,7 +499,7 @@ export function AttendancePage(): JSX.Element {
               disabled={page >= totalPages}
               className="btn-secondary px-2 py-1.5 text-xs disabled:opacity-40"
             >
-              u203a
+              ›
             </button>
             <button
               type="button"
@@ -507,7 +507,7 @@ export function AttendancePage(): JSX.Element {
               disabled={page >= totalPages}
               className="btn-secondary px-2 py-1.5 text-xs disabled:opacity-40"
             >
-              u00bb
+              »
             </button>
           </div>
         </div>

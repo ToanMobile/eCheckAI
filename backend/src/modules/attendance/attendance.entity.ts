@@ -100,7 +100,7 @@ export class AttendanceRecord {
   @Column({ name: 'schedule_id', type: 'uuid', nullable: true })
   scheduleId!: string | null;
 
-  @Column({ nullable: true, length: 500 })
+  @Column({ nullable: true, type: 'varchar', length: 500 })
   note!: string | null;
 
   @Column({ name: 'is_fraud_flagged', default: false })

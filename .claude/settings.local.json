@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p /Volumes/Data/GalaxyHolding/HDBankConnect/backend/src/config)",
+      "Bash(mkdir -p /Volumes/Data/GalaxyHolding/HDBankConnect/backend/src/common/utils)",
+      "Bash(mkdir -p /Volumes/Data/GalaxyHolding/HDBankConnect/backend/src/common/guards)",
+      "Bash(mkdir -p /Volumes/Data/GalaxyHolding/HDBankConnect/backend/src/common/decorators)",
+      "Bash(mkdir -p /Volumes/Data/GalaxyHolding/HDBankConnect/backend/src/common/filters)",
+      "Bash(npx tsc *)",
+      "Bash(./node_modules/.bin/tsc --noEmit)",
+      "Bash(python3 -c \"import json,sys; p=json.load\\(sys.stdin\\); deps={**p.get\\('dependencies',{}\\), **p.get\\('devDependencies',{}\\)}; print\\('helmet:', 'helmet' in deps\\); print\\('ioredis:', 'ioredis' in deps\\); print\\('@nestjs/schedule:', '@nestjs/schedule' in deps\\)\")",
+      "Bash(ls /Volumes/Data/GalaxyHolding/HDBankConnect/*.yml)",
+      "Read(//Volumes/Data/GalaxyHolding/HDBankConnect/backend/=== CI/**)",
+      "Read(//Volumes/Data/GalaxyHolding/HDBankConnect/backend/**)",
+      "Read(//private/tmp/**)",
+      "Bash(python3 -c ' *)",
+      "Bash(ls -d */)",
+      "Bash(ls package*.json tsconfig.json nest-cli.json)",
+      "Bash(npm install *)",
+      "Bash(npx nest *)",
+      "Bash(npx jest *)",
+      "Bash(python3 -c \"import json,sys; p=json.load\\(sys.stdin\\); print\\('jest config:', json.dumps\\(p.get\\('jest',{}\\),indent=2\\)\\)\")",
+      "Bash(npx vite *)",
+      "Bash(ls tsconfig*.json)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git branch *)",
+      "Bash(docker --version)",
+      "Bash(docker compose *)",
+      "Bash(timeout 6 node dist/main.js)",
+      "Bash(gtimeout 6 node dist/main.js)",
+      "Bash(node -e ' *)",
+      "Bash(node *)"
+    ]
+  }
+}

@@ -3,9 +3,9 @@ import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { AttendanceStatus, FraudSeverity } from '@/types';
 
-// u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500
+// ────────────────────────────────────────────────────────────────
 // Attendance Status Badge
-// u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500
+// ────────────────────────────────────────────────────────────────
 
 interface StatusConfig {
   label: string;
@@ -15,27 +15,27 @@ interface StatusConfig {
 
 const statusConfig: Record<AttendanceStatus, StatusConfig> = {
   on_time: {
-    label: 'u0110u00fang giu1edd',
+    label: 'Đúng giờ',
     className: 'bg-success-bg text-success-text',
     Icon: CheckCircle2,
   },
   late: {
-    label: 'Muu1ed9n',
+    label: 'Muộn',
     className: 'bg-warning-bg text-warning-text',
     Icon: Clock,
   },
   early_leave: {
-    label: 'Vu1ec1 su1edbm',
+    label: 'Về sớm',
     className: 'bg-warning-bg text-warning-text',
     Icon: AlertCircle,
   },
   absent: {
-    label: 'Vu1eafng',
+    label: 'Vắng',
     className: 'bg-danger-bg text-danger-text',
     Icon: XCircle,
   },
   pending: {
-    label: 'Chu1edd xu00e1c nhu1eadn',
+    label: 'Chờ xác nhận',
     className: 'bg-neutral-100 text-neutral-600',
     Icon: MinusCircle,
   },
@@ -66,9 +66,9 @@ export function StatusBadge({ status, className, compact = false }: StatusBadgeP
   );
 }
 
-// u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500
+// ────────────────────────────────────────────────────────────────
 // Fraud Severity Badge
-// u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500
+// ────────────────────────────────────────────────────────────────
 
 interface SeverityConfig {
   label: string;
@@ -77,7 +77,7 @@ interface SeverityConfig {
 
 const severityConfig: Record<FraudSeverity, SeverityConfig> = {
   critical: {
-    label: 'Nghu01b0u1ee1m tru1ecdng',
+    label: 'Nghưỡm trọng',
     className: 'bg-danger-bg text-danger-text border border-danger-base/20',
   },
   high: {
@@ -85,11 +85,11 @@ const severityConfig: Record<FraudSeverity, SeverityConfig> = {
     className: 'bg-orange-100 text-orange-800 border border-orange-200',
   },
   medium: {
-    label: 'Trung bu00ecnh',
+    label: 'Trung bình',
     className: 'bg-warning-bg text-warning-text border border-warning-base/20',
   },
   low: {
-    label: 'Thu1ea5p',
+    label: 'Thấp',
     className: 'bg-neutral-100 text-neutral-600 border border-neutral-200',
   },
 };
@@ -116,9 +116,9 @@ export function SeverityBadge({ severity, className }: SeverityBadgeProps): JSX.
   );
 }
 
-// u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500
+// ────────────────────────────────────────────────────────────────
 // Generic colored badge (for role labels, etc.)
-// u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500
+// ────────────────────────────────────────────────────────────────
 
 interface RoleBadgeProps {
   role: string;
@@ -128,8 +128,8 @@ interface RoleBadgeProps {
 const roleConfig: Record<string, { label: string; className: string }> = {
   super_admin: { label: 'Super Admin', className: 'bg-primary-100 text-primary-800' },
   hr: { label: 'HR', className: 'bg-info-bg text-info-text' },
-  branch_manager: { label: 'Quu1ea3n lu00fd CN', className: 'bg-purple-100 text-purple-800' },
-  employee: { label: 'Nhu00e2n viu00ean', className: 'bg-neutral-100 text-neutral-700' },
+  branch_manager: { label: 'Quản lý CN', className: 'bg-purple-100 text-purple-800' },
+  employee: { label: 'Nhân viên', className: 'bg-neutral-100 text-neutral-700' },
 };
 
 export function RoleBadge({ role, className }: RoleBadgeProps): JSX.Element {

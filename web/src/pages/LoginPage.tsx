@@ -13,11 +13,11 @@ import type { ApiResponse, LoginResponse } from '@/types';
 const loginSchema = z.object({
   email: z
     .string()
-    .min(1, 'Email khu00f4ng u0111u01b0u1ee3c u0111u1ec3 tru1ed1ng')
-    .email('Email khu00f4ng u0111u00fang u0111u1ecbnh du1ea1ng'),
+    .min(1, 'Email không được để trống')
+    .email('Email không đúng định dạng'),
   password: z
     .string()
-    .min(6, 'Mu1eadt khu1ea9u tu1ed1i thiu1ec3u 6 ku00fd tu1ef1'),
+    .min(6, 'Mật khẩu tối thiểu 6 ký tự'),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -52,13 +52,13 @@ export function LoginPage(): JSX.Element {
       if (!payload) throw new Error('Invalid response');
 
       login(payload);
-      toast.success('u0110u0103ng nhu1eadp thu00e0nh cu00f4ng!');
+      toast.success('Đăng nhập thành công!');
       navigate('/', { replace: true });
     } catch (error: unknown) {
       if (isAppError(error)) {
         setServerError(error.message);
       } else {
-        setServerError('u0110u0103ng nhu1eadp thu1ea5t bu1ea1i. Vui lu00f2ng thu1eed lu1ea1i.');
+        setServerError('Đăng nhập thất bại. Vui lòng thử lại.');
       }
     } finally {
       setIsLoading(false);
@@ -77,14 +77,14 @@ export function LoginPage(): JSX.Element {
             Smart Attendance
           </h1>
           <p className="text-sm text-neutral-500 mt-1 text-center">
-            Hu1ec7 thu1ed1ng chu1ea5m cu00f4ng thu00f4ng minh
+            Hệ thống chấm công thông minh
           </p>
         </div>
 
         {/* Card */}
         <div className="card p-8">
           <h2 className="text-lg font-semibold text-neutral-950 mb-6">
-            u0110u0103ng nhu1eadp
+            Đăng nhập
           </h2>
 
           <form
@@ -121,7 +121,7 @@ export function LoginPage(): JSX.Element {
             {/* Password */}
             <div>
               <label htmlFor="password" className="label">
-                Mu1eadt khu1ea9u
+                Mật khẩu
               </label>
               <div className="relative">
                 <input
@@ -133,7 +133,7 @@ export function LoginPage(): JSX.Element {
                     errors.password &&
                       'ring-2 ring-danger-base border-danger-base',
                   )}
-                  placeholder="u2022u2022u2022u2022u2022u2022u2022u2022"
+                  placeholder="••••••••"
                   {...register('password')}
                   aria-invalid={errors.password ? 'true' : 'false'}
                   aria-describedby={errors.password ? 'password-error' : undefined}
@@ -142,7 +142,7 @@ export function LoginPage(): JSX.Element {
                   type="button"
                   onClick={() => setShowPassword((p) => !p)}
                   className="absolute inset-y-0 right-0 flex items-center px-3 text-neutral-400 hover:text-neutral-600 transition-colors"
-                  aria-label={showPassword ? 'u1ea8n mu1eadt khu1ea9u' : 'Hiu1ec3n mu1eadt khu1ea9u'}
+                  aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiển mật khẩu'}
                 >
                   {showPassword ? (
                     <EyeOff className="w-4 h-4" aria-hidden="true" />
@@ -178,12 +178,12 @@ export function LoginPage(): JSX.Element {
               {isLoading ? (
                 <span className="flex items-center gap-2">
                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  u0110ang u0111u0103ng nhu1eadp...
+                  Đang đăng nhập...
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
                   <LogIn className="w-4 h-4" aria-hidden="true" />
-                  u0110u0103ng nhu1eadp
+                  Đăng nhập
                 </span>
               )}
             </button>
@@ -191,7 +191,7 @@ export function LoginPage(): JSX.Element {
         </div>
 
         <p className="text-center text-xs text-neutral-400 mt-6">
-          Smart Attendance V2 u00b7 Giu1ea3i Phu00e1p Su1ed1
+          Smart Attendance V2 · Giải Pháp Số
         </p>
       </div>
     </div>

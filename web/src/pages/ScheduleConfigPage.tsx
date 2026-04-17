@@ -16,38 +16,38 @@ import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import type { Schedule, Branch, CreateScheduleDto, WeekDay } from '@/types';
 
-// u2500u2500 Days config u2500u2500
+// ── Days config ──
 const WEEK_DAYS: { value: WeekDay; label: string; short: string }[] = [
-  { value: 1, label: 'Thu1ee9 Hai', short: 'T2' },
-  { value: 2, label: 'Thu1ee9 Ba', short: 'T3' },
-  { value: 3, label: 'Thu1ee9 Tu01b0', short: 'T4' },
-  { value: 4, label: 'Thu1ee9 Nu0103m', short: 'T5' },
-  { value: 5, label: 'Thu1ee9 Su00e1u', short: 'T6' },
-  { value: 6, label: 'Thu1ee9 Bu1ea3y', short: 'T7' },
-  { value: 0, label: 'Chu1ee7 Nhu1eadt', short: 'CN' },
+  { value: 1, label: 'Thứ Hai', short: 'T2' },
+  { value: 2, label: 'Thứ Ba', short: 'T3' },
+  { value: 3, label: 'Thứ Tư', short: 'T4' },
+  { value: 4, label: 'Thứ Năm', short: 'T5' },
+  { value: 5, label: 'Thứ Sáu', short: 'T6' },
+  { value: 6, label: 'Thứ Bảy', short: 'T7' },
+  { value: 0, label: 'Chủ Nhật', short: 'CN' },
 ];
 
-// u2500u2500 Schema u2500u2500
+// ── Schema ──
 const scheduleSchema = z.object({
   checkin_time: z
     .string()
-    .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Giu1edd khu00f4ng hu1ee3p lu1ec7 (HH:mm)'),
+    .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Giờ không hợp lệ (HH:mm)'),
   checkout_time: z
     .string()
-    .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Giu1edd khu00f4ng hu1ee3p lu1ec7 (HH:mm)'),
+    .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Giờ không hợp lệ (HH:mm)'),
   window_minutes: z
-    .number({ invalid_type_error: 'Cu1ea7u vu1eafc su1ed1 phu00fat' })
-    .min(1, 'Tu1ed1i thiu1ec3u 1 phu00fat')
-    .max(120, 'Tu1ed1i u0111a 120 phu00fat'),
+    .number({ invalid_type_error: 'Cầu vắc số phút' })
+    .min(1, 'Tối thiểu 1 phút')
+    .max(120, 'Tối đa 120 phút'),
   active_days: z
     .array(z.number())
-    .min(1, 'Phu1ea3i chu1ecdn u00edt nhu1ea5t 1 ngu00e0y'),
+    .min(1, 'Phải chọn ít nhất 1 ngày'),
   is_active: z.boolean(),
 });
 
 type ScheduleFormData = z.infer<typeof scheduleSchema>;
 
-// u2500u2500 API u2500u2500
+// ── API ──
 async function fetchSchedules(): Promise<Schedule[]> {
   const { data } = await api.get<{ data: { items: Schedule[] } }>(
     '/schedules',
@@ -76,7 +76,7 @@ async function updateSchedule(
   return data.data;
 }
 
-// u2500u2500 Day selector u2500u2500
+// ── Day selector ──
 function DaySelector({
   value,
   onChange,
@@ -131,7 +131,7 @@ function DaySelector({
   );
 }
 
-// u2500u2500 Schedule card u2500u2500
+// ── Schedule card ──
 function ScheduleCard({
   schedule,
   onEdit,
@@ -152,7 +152,7 @@ function ScheduleCard({
           </h3>
           {!schedule.is_active && (
             <span className="text-xs text-neutral-400">
-              Khu00f4ng hou1ea1t u0111u1ed9ng
+              Không hoạt động
             </span>
           )}
         </div>
@@ -160,7 +160,7 @@ function ScheduleCard({
           type="button"
           onClick={onEdit}
           className="p-1.5 rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-primary-600 transition-colors"
-          aria-label="Chu1ec9nh su1eeda lu1ecbch ca"
+          aria-label="Chỉnh sửa lịch ca"
         >
           <Edit2 className="w-4 h-4" aria-hidden="true" />
         </button>
@@ -168,13 +168,13 @@ function ScheduleCard({
 
       <div className="grid grid-cols-2 gap-3 mb-3">
         <div className="bg-neutral-50 rounded-lg px-3 py-2">
-          <p className="text-xs text-neutral-500 mb-0.5">Giu1edd vu00e0o</p>
+          <p className="text-xs text-neutral-500 mb-0.5">Giờ vào</p>
           <p className="font-mono text-base font-semibold text-neutral-950">
             {schedule.checkin_time}
           </p>
         </div>
         <div className="bg-neutral-50 rounded-lg px-3 py-2">
-          <p className="text-xs text-neutral-500 mb-0.5">Giu1edd ra</p>
+          <p className="text-xs text-neutral-500 mb-0.5">Giờ ra</p>
           <p className="font-mono text-base font-semibold text-neutral-950">
             {schedule.checkout_time}
           </p>
@@ -193,14 +193,14 @@ function ScheduleCard({
           ))}
         </div>
         <span className="text-xs text-neutral-500">
-          Cu1eeda su1ed5 u00b1{schedule.window_minutes} phu00fat
+          Cửa sổ ±{schedule.window_minutes} phút
         </span>
       </div>
     </div>
   );
 }
 
-// u2500u2500 Schedule edit modal u2500u2500
+// ── Schedule edit modal ──
 function ScheduleModal({
   schedule,
   branches,
@@ -245,12 +245,12 @@ function ScheduleModal({
     },
     onSuccess: () => {
       toast.success(
-        isNew ? 'Tu1ea1o lu1ecbch ca thu00e0nh cu00f4ng!' : 'Cu1eadp nhu1eadt thu00e0nh cu00f4ng!',
+        isNew ? 'Tạo lịch ca thành công!' : 'Cập nhật thành công!',
       );
       void queryClient.invalidateQueries({ queryKey: ['schedules'] });
       onClose();
     },
-    onError: () => toast.error('Lu01b0u thu1ea5t bu1ea1i'),
+    onError: () => toast.error('Lưu thất bại'),
   });
 
   return (
@@ -266,15 +266,15 @@ function ScheduleModal({
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200">
           <h2 id="schedule-modal-title" className="text-h3">
-            {isNew ? 'Tu1ea1o lu1ecbch ca' : 'Chu1ec9nh su1eeda lu1ecbch ca'}
+            {isNew ? 'Tạo lịch ca' : 'Chỉnh sửa lịch ca'}
           </h2>
           <button
             type="button"
             onClick={onClose}
             className="text-neutral-400 hover:text-neutral-700 text-xl leading-none"
-            aria-label="u0110u00f3ng"
+            aria-label="Đóng"
           >
-            u00d7
+            ×
           </button>
         </div>
 
@@ -287,7 +287,7 @@ function ScheduleModal({
           {isNew && (
             <div>
               <label htmlFor="branch_select" className="label">
-                Chi nhu00e1nh <span className="text-danger-base">*</span>
+                Chi nhánh <span className="text-danger-base">*</span>
               </label>
               <select
                 id="branch_select"
@@ -295,7 +295,7 @@ function ScheduleModal({
                 value={selectedBranchId}
                 onChange={(e) => setSelectedBranchId(e.target.value)}
               >
-                <option value="">Chu1ecdn chi nhu00e1nh...</option>
+                <option value="">Chọn chi nhánh...</option>
                 {branches.map((b) => (
                   <option key={b.id} value={b.id}>
                     {b.name}
@@ -309,7 +309,7 @@ function ScheduleModal({
             {/* Checkin time */}
             <div>
               <label htmlFor="checkin_time" className="label">
-                Giu1edd vu00e0o <span className="text-danger-base">*</span>
+                Giờ vào <span className="text-danger-base">*</span>
               </label>
               <input
                 id="checkin_time"
@@ -328,7 +328,7 @@ function ScheduleModal({
             {/* Checkout time */}
             <div>
               <label htmlFor="checkout_time" className="label">
-                Giu1edd ra <span className="text-danger-base">*</span>
+                Giờ ra <span className="text-danger-base">*</span>
               </label>
               <input
                 id="checkout_time"
@@ -348,7 +348,7 @@ function ScheduleModal({
           {/* Window minutes */}
           <div>
             <label htmlFor="window_minutes" className="label">
-              Cu1eeda su1ed5 cho phu00e9p (phu00fat)
+              Cửa sổ cho phép (phút)
             </label>
             <input
               id="window_minutes"
@@ -369,7 +369,7 @@ function ScheduleModal({
           {/* Active days */}
           <div>
             <p className="label mb-2">
-              Ngu00e0y hou1ea1t u0111u1ed9ng <span className="text-danger-base">*</span>
+              Ngày hoạt động <span className="text-danger-base">*</span>
             </p>
             <Controller
               name="active_days"
@@ -391,7 +391,7 @@ function ScheduleModal({
               onClick={onClose}
               className="btn-secondary"
             >
-              Hu1ee7y
+              Hủy
             </button>
             <button
               type="submit"
@@ -401,12 +401,12 @@ function ScheduleModal({
               {isPending ? (
                 <span className="flex items-center gap-2">
                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  u0110ang lu01b0u...
+                  Đang lưu...
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
                   <Save className="w-4 h-4" aria-hidden="true" />
-                  Lu01b0u
+                  Lưu
                 </span>
               )}
             </button>
@@ -417,7 +417,7 @@ function ScheduleModal({
   );
 }
 
-// u2500u2500 Page u2500u2500
+// ── Page ──
 export function ScheduleConfigPage(): JSX.Element {
   const [editingSchedule, setEditingSchedule] = useState<Schedule | null | undefined>(undefined);
 
@@ -437,9 +437,9 @@ export function ScheduleConfigPage(): JSX.Element {
     <div className="space-y-5">
       <div className="page-header">
         <div>
-          <h1 className="text-h1">Cu1ea5u hu00ecnh lu1ecbch ca</h1>
+          <h1 className="text-h1">Cấu hình lịch ca</h1>
           <p className="text-body-sm mt-1">
-            {schedules.length} lu1ecbch ca
+            {schedules.length} lịch ca
           </p>
         </div>
         <button
@@ -448,7 +448,7 @@ export function ScheduleConfigPage(): JSX.Element {
           className="btn-primary"
         >
           <Plus className="w-4 h-4" aria-hidden="true" />
-          Tu1ea1o lu1ecbch ca
+          Tạo lịch ca
         </button>
       </div>
 
@@ -471,14 +471,14 @@ export function ScheduleConfigPage(): JSX.Element {
             className="w-12 h-12 text-neutral-300 mb-4"
             aria-hidden="true"
           />
-          <p className="text-neutral-500 mb-4">Chu01b0a cu00f3 lu1ecbch ca nu00e0o</p>
+          <p className="text-neutral-500 mb-4">Chưa có lịch ca nào</p>
           <button
             type="button"
             onClick={() => setEditingSchedule(null)}
             className="btn-primary"
           >
             <Plus className="w-4 h-4" aria-hidden="true" />
-            Tu1ea1o lu1ecbch ca u0111u1ea7u tiu00ean
+            Tạo lịch ca đầu tiên
           </button>
         </div>
       ) : (

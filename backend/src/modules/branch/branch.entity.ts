@@ -52,7 +52,7 @@ export class Branch {
   @Column({ name: 'manager_id', nullable: true, type: 'uuid' })
   managerId!: string | null;
 
-  @Column({ name: 'phone_number', nullable: true, length: 20 })
+  @Column({ name: 'phone_number', nullable: true, type: 'varchar', length: 20 })
   phoneNumber!: string | null;
 
   @Column({ name: 'timezone', length: 50, default: 'Asia/Ho_Chi_Minh' })

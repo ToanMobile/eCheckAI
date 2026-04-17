@@ -20,31 +20,31 @@ const NAV_ITEMS = [
   },
   {
     to: '/branches',
-    label: 'Chi nhu00e1nh',
+    label: 'Chi nhánh',
     Icon: Building2,
     end: false,
   },
   {
     to: '/schedules',
-    label: 'Lu1ecbch ca',
+    label: 'Lịch ca',
     Icon: Clock,
     end: false,
   },
   {
     to: '/employees',
-    label: 'Nhu00e2n viu00ean',
+    label: 'Nhân viên',
     Icon: Users,
     end: false,
   },
   {
     to: '/attendance',
-    label: 'Chu1ea5m cu00f4ng',
+    label: 'Chấm công',
     Icon: CalendarCheck,
     end: false,
   },
   {
     to: '/fraud',
-    label: 'Phu00e1t hiu1ec7n gian lu1eadn',
+    label: 'Phát hiện gian lận',
     Icon: ShieldAlert,
     end: false,
   },
@@ -58,10 +58,10 @@ const WS_STATUS_COLOR: Record<string, string> = {
 };
 
 const WS_STATUS_LABEL: Record<string, string> = {
-  connected: 'Ku1ebft nu1ed1i tru1ef1c tiu1ebfp',
-  connecting: 'u0110ang ku1ebft nu1ed1i...',
-  disconnected: 'Ngu1eaft ku1ebft nu1ed1i',
-  error: 'Lu1ed7i ku1ebft nu1ed1i',
+  connected: 'Kết nối trực tiếp',
+  connecting: 'Đang kết nối...',
+  disconnected: 'Ngắt kết nối',
+  error: 'Lỗi kết nối',
 };
 
 interface SidebarProps {
@@ -80,7 +80,7 @@ export function Sidebar({ className, wsStatus = 'disconnected' }: SidebarProps):
         'bg-neutral-50 border-r border-neutral-200',
         className,
       )}
-      aria-label="Navigation chu00ednh"
+      aria-label="Navigation chính"
     >
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 h-14 border-b border-neutral-200 shrink-0">
@@ -94,7 +94,7 @@ export function Sidebar({ className, wsStatus = 'disconnected' }: SidebarProps):
           <p className="text-sm font-semibold text-neutral-950 leading-tight">
             Smart Attendance
           </p>
-          <p className="text-[10px] text-neutral-400 leading-tight">Giu1ea3i Phu00e1p Su1ed1</p>
+          <p className="text-[10px] text-neutral-400 leading-tight">Giải Pháp Số</p>
         </div>
       </div>
 
@@ -139,7 +139,7 @@ export function Sidebar({ className, wsStatus = 'disconnected' }: SidebarProps):
             aria-hidden="true"
           />
           <span className="text-xs text-neutral-500">
-            {WS_STATUS_LABEL[status] ?? 'Khu00f4ng xu00e1c u0111u1ecbnh'}
+            {WS_STATUS_LABEL[status] ?? 'Không xác định'}
           </span>
         </div>
       </div>

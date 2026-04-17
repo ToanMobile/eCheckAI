@@ -46,7 +46,7 @@ export function Header({ onMenuToggle, className }: HeaderProps): JSX.Element {
         type="button"
         onClick={onMenuToggle}
         className="lg:hidden p-2 rounded-lg text-neutral-600 hover:bg-neutral-100 transition-colors"
-        aria-label="Mu1edf menu"
+        aria-label="Mở menu"
       >
         <Menu className="w-5 h-5" aria-hidden="true" />
       </button>
@@ -65,7 +65,7 @@ export function Header({ onMenuToggle, className }: HeaderProps): JSX.Element {
               setIsUserMenuOpen(false);
             }}
             className="relative p-2 rounded-lg text-neutral-600 hover:bg-neutral-100 transition-colors"
-            aria-label={`Thu00f4ng bu00e1o${notifCount > 0 ? ` (${notifCount} mu1edbi)` : ''}`}
+            aria-label={`Thông báo${notifCount > 0 ? ` (${notifCount} mới)` : ''}`}
             aria-expanded={isNotifOpen}
           >
             <Bell className="w-5 h-5" aria-hidden="true" />
@@ -81,23 +81,23 @@ export function Header({ onMenuToggle, className }: HeaderProps): JSX.Element {
             <div
               className="absolute right-0 top-full mt-1.5 w-80 bg-white border border-neutral-200 rounded-lg shadow-lg z-50"
               role="dialog"
-              aria-label="Thu00f4ng bu00e1o"
+              aria-label="Thông báo"
             >
               <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200">
-                <p className="text-sm font-semibold text-neutral-950">Thu00f4ng bu00e1o</p>
+                <p className="text-sm font-semibold text-neutral-950">Thông báo</p>
                 <button
                   type="button"
                   onClick={() => setIsNotifOpen(false)}
                   className="text-xs text-primary-600 hover:text-primary-700 font-medium"
                 >
-                  u0110u00f3ng
+                  Đóng
                 </button>
               </div>
 
               <div className="max-h-64 overflow-y-auto">
                 {fraudAlerts.length === 0 ? (
                   <p className="px-4 py-6 text-center text-sm text-neutral-500">
-                    Khu00f4ng cu00f3 thu00f4ng bu00e1o mu1edbi
+                    Không có thông báo mới
                   </p>
                 ) : (
                   fraudAlerts.slice(0, 10).map((alert) => (
@@ -137,7 +137,7 @@ export function Header({ onMenuToggle, className }: HeaderProps): JSX.Element {
             }}
             className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-neutral-100 transition-colors"
             aria-expanded={isUserMenuOpen}
-            aria-label="Menu ngu01b0u1eddi du00f9ng"
+            aria-label="Menu người dùng"
           >
             {/* Avatar */}
             <div className="w-7 h-7 rounded-full bg-primary-100 flex items-center justify-center shrink-0">
@@ -156,7 +156,7 @@ export function Header({ onMenuToggle, className }: HeaderProps): JSX.Element {
 
             <div className="hidden md:block text-left min-w-0">
               <p className="text-sm font-medium text-neutral-950 truncate max-w-[120px]">
-                {user?.full_name ?? 'Ngu01b0u1eddi du00f9ng'}
+                {user?.full_name ?? 'Người dùng'}
               </p>
               {user?.role && (
                 <RoleBadge role={user.role} className="mt-0.5" />
@@ -177,7 +177,7 @@ export function Header({ onMenuToggle, className }: HeaderProps): JSX.Element {
             <div
               className="absolute right-0 top-full mt-1.5 w-52 bg-white border border-neutral-200 rounded-lg shadow-lg z-50"
               role="menu"
-              aria-label="Menu ngu01b0u1eddi du00f9ng"
+              aria-label="Menu người dùng"
             >
               {/* User info */}
               <div className="px-4 py-3 border-b border-neutral-200">
@@ -201,7 +201,7 @@ export function Header({ onMenuToggle, className }: HeaderProps): JSX.Element {
                   role="menuitem"
                 >
                   <User className="w-4 h-4 text-neutral-400" aria-hidden="true" />
-                  Hu1ed3 su01a1 cu00e1 nhu00e2n
+                  Hồ sơ cá nhân
                 </button>
                 <button
                   type="button"
@@ -213,7 +213,7 @@ export function Header({ onMenuToggle, className }: HeaderProps): JSX.Element {
                   role="menuitem"
                 >
                   <Settings className="w-4 h-4 text-neutral-400" aria-hidden="true" />
-                  Cu00e0i u0111u1eb7t
+                  Cài đặt
                 </button>
               </div>
 
@@ -225,7 +225,7 @@ export function Header({ onMenuToggle, className }: HeaderProps): JSX.Element {
                   role="menuitem"
                 >
                   <LogOut className="w-4 h-4" aria-hidden="true" />
-                  u0110u0103ng xuu1ea5t
+                  Đăng xuất
                 </button>
               </div>
             </div>

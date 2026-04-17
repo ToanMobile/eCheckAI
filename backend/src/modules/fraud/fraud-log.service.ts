@@ -9,7 +9,6 @@ import { FraudLog, FraudSeverity, FraudType } from './fraud-log.entity';
 
 export interface FraudLogInput {
   employeeId: string;
-  branchId?: string | null;
   attendanceId?: string | null;
   fraudType: FraudType;
   severity?: FraudSeverity;
@@ -18,7 +17,6 @@ export interface FraudLogInput {
 }
 
 export interface FraudLogQueryDto {
-  branchId?: string;
   severity?: FraudSeverity;
   fraudType?: FraudType;
   resolved?: boolean;
@@ -51,7 +49,6 @@ export class FraudLogService {
   async logFraud(input: FraudLogInput): Promise<FraudLog> {
     const log = this.fraudLogRepository.create({
       employeeId: input.employeeId,
-      branchId: input.branchId ?? null,
       attendanceId: input.attendanceId ?? null,
       fraudType: input.fraudType,
       severity: input.severity ?? FraudSeverity.MEDIUM,
@@ -67,56 +64,71 @@ export class FraudLogService {
   }
 
   /**
-   * Get paginated fraud logs with optional filters.
+   * Get paginated fraud logs with optional filters — joins employees for display fields.
    */
   async getAll(query: FraudLogQueryDto): Promise<PaginatedFraudLogs> {
     const page = query.page ?? 1;
     const limit = Math.min(query.limit ?? 20, 50);
     const skip = (page - 1) * limit;
 
-    const qb: SelectQueryBuilder<FraudLog> = this.fraudLogRepository
-      .createQueryBuilder('fl')
-      .orderBy('fl.created_at', 'DESC');
-
-    if (query.branchId) {
-      qb.andWhere('fl.branch_id = :branchId', { branchId: query.branchId });
-    }
+    const params: unknown[] = [];
+    const conditions: string[] = [];
 
     if (query.severity) {
-      qb.andWhere('fl.severity = :severity', { severity: query.severity });
+      params.push(query.severity);
+      conditions.push(`fl.severity = $${params.length}`);
     }
-
     if (query.fraudType) {
-      qb.andWhere('fl.fraud_type = :fraudType', { fraudType: query.fraudType });
+      params.push(query.fraudType);
+      conditions.push(`fl.fraud_type = $${params.length}`);
     }
-
     if (query.resolved === true) {
-      qb.andWhere('fl.resolved_at IS NOT NULL');
+      conditions.push('fl.resolved_at IS NOT NULL');
     } else if (query.resolved === false) {
-      qb.andWhere('fl.resolved_at IS NULL');
+      conditions.push('fl.resolved_at IS NULL');
     }
-
     if (query.dateFrom) {
-      qb.andWhere('fl.created_at >= :dateFrom', {
-        dateFrom: new Date(query.dateFrom),
-      });
+      params.push(new Date(query.dateFrom));
+      conditions.push(`fl.created_at >= $${params.length}`);
     }
-
     if (query.dateTo) {
-      qb.andWhere('fl.created_at <= :dateTo', {
-        dateTo: new Date(query.dateTo + 'T23:59:59Z'),
-      });
+      params.push(new Date(query.dateTo + 'T23:59:59Z'));
+      conditions.push(`fl.created_at <= $${params.length}`);
     }
 
-    const [items, total] = await qb.skip(skip).take(limit).getManyAndCount();
+    const where = conditions.length ? 'WHERE ' + conditions.join(' AND ') : '';
 
-    return {
-      items,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    };
+    const countParams = [...params];
+    const countSql = `SELECT COUNT(*) AS total FROM fraud_logs fl ${where}`;
+    const totalResult = await this.fraudLogRepository.query(countSql, countParams) as Array<{ total: string }>;
+    const total = parseInt(totalResult[0].total, 10);
+
+    params.push(limit);
+    params.push(skip);
+    const dataSql = `
+      SELECT
+        fl.id, fl.employee_id, fl.fraud_type AS type, fl.severity,
+        fl.details, fl.ip_address, fl.resolved_at, fl.resolved_by,
+        fl.resolution_note, fl.created_at, fl.updated_at,
+        e.employee_code, e.full_name,
+        b.id   AS branch_id,
+        b.name AS branch_name
+      FROM fraud_logs fl
+      LEFT JOIN employees e ON e.id = fl.employee_id
+      LEFT JOIN branches  b ON b.id = e.branch_id
+      ${where}
+      ORDER BY fl.created_at DESC
+      LIMIT $${params.length - 1} OFFSET $${params.length}
+    `;
+
+    const rows = await this.fraudLogRepository.query(dataSql, params) as Record<string, unknown>[];
+
+    const items = rows.map(r => ({
+      ...r,
+      is_resolved: r['resolved_at'] != null,
+    })) as unknown as FraudLog[];
+
+    return { items, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
   /**

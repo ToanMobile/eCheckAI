@@ -28,7 +28,7 @@ export function AppLayout(): JSX.Element {
         />
       )}
 
-      {/* Sidebar u2014 always visible on desktop, slide-in on mobile */}
+      {/* Sidebar — always visible on desktop, slide-in on mobile */}
       <div
         className={cn(
           'fixed inset-y-0 left-0 z-50 transition-transform duration-300 lg:relative lg:translate-x-0',
@@ -48,7 +48,7 @@ export function AppLayout(): JSX.Element {
           id="main-content"
           className="flex-1 overflow-y-auto p-6"
           role="main"
-          aria-label="Nu1ed9i dung chu00ednh"
+          aria-label="Nội dung chính"
         >
           <Outlet />
         </main>

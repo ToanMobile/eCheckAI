@@ -18,30 +18,30 @@ import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import type { Branch, CreateBranchDto } from '@/types';
 
-// u2500u2500 Schema u2500u2500
+// ── Schema ──
 const branchSchema = z.object({
-  code: z.string().min(1, 'Mu00e3 chi nhu00e1nh khu00f4ng u0111u01b0u1ee3c u0111u1ec3 tru1ed1ng'),
-  name: z.string().min(1, 'Tu00ean chi nhu00e1nh khu00f4ng u0111u01b0u1ee3c u0111u1ec3 tru1ed1ng'),
-  address: z.string().min(1, 'u0110u1ecba chu1ec9 khu00f4ng u0111u01b0u1ee3c u0111u1ec3 tru1ed1ng'),
+  code: z.string().min(1, 'Mã chi nhánh không được để trống'),
+  name: z.string().min(1, 'Tên chi nhánh không được để trống'),
+  address: z.string().min(1, 'Địa chỉ không được để trống'),
   latitude: z
-    .number({ invalid_type_error: 'Vu0129 u0111u1ed9 khu00f4ng hu1ee3p lu1ec7' })
-    .min(-90, 'Vu0129 u0111u1ed9 tu1ed1i thiu1ec3u -90')
-    .max(90, 'Vu0129 u0111u1ed9 tu1ed1i u0111a 90'),
+    .number({ invalid_type_error: 'Vĩ độ không hợp lệ' })
+    .min(-90, 'Vĩ độ tối thiểu -90')
+    .max(90, 'Vĩ độ tối đa 90'),
   longitude: z
-    .number({ invalid_type_error: 'Kinh u0111u1ed9 khu00f4ng hu1ee3p lu1ec7' })
-    .min(-180, 'Kinh u0111u1ed9 tu1ed1i thiu1ec3u -180')
-    .max(180, 'Kinh u0111u1ed9 tu1ed1i u0111a 180'),
+    .number({ invalid_type_error: 'Kinh độ không hợp lệ' })
+    .min(-180, 'Kinh độ tối thiểu -180')
+    .max(180, 'Kinh độ tối đa 180'),
   radius_meters: z
-    .number({ invalid_type_error: 'Bu00e1n ku00ednh khu00f4ng hu1ee3p lu1ec7' })
-    .min(10, 'Bu00e1n ku00ednh tu1ed1i thiu1ec3u 10m')
-    .max(5000, 'Bu00e1n ku00ednh tu1ed1i u0111a 5000m'),
+    .number({ invalid_type_error: 'Bán kính không hợp lệ' })
+    .min(10, 'Bán kính tối thiểu 10m')
+    .max(5000, 'Bán kính tối đa 5000m'),
   wifi_bssids: z.array(
     z.object({
       value: z
         .string()
         .regex(
           /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/,
-          'BSSID khu00f4ng u0111u00fang u0111u1ecbnh du1ea1ng (VD: AA:BB:CC:DD:EE:FF)',
+          'BSSID không đúng định dạng (VD: AA:BB:CC:DD:EE:FF)',
         ),
     }),
   ),
@@ -51,7 +51,7 @@ const branchSchema = z.object({
 
 type BranchFormData = z.infer<typeof branchSchema>;
 
-// u2500u2500 API helpers u2500u2500
+// ── API helpers ──
 async function fetchBranches(): Promise<Branch[]> {
   const { data } = await api.get<{ data: { items: Branch[] } }>('/branches', {
     params: { per_page: 200 },
@@ -69,7 +69,7 @@ async function updateBranch(id: string, dto: Partial<CreateBranchDto>): Promise<
   return data.data;
 }
 
-// u2500u2500 Branch list item u2500u2500
+// ── Branch list item ──
 function BranchListItem({
   branch,
   isSelected,
@@ -111,14 +111,14 @@ function BranchListItem({
       </div>
       {!branch.is_active && (
         <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-neutral-100 text-neutral-500 mt-1.5">
-          Khu00f4ng hou1ea1t u0111u1ed9ng
+          Không hoạt động
         </span>
       )}
     </button>
   );
 }
 
-// u2500u2500 Branch form u2500u2500
+// ── Branch form ──
 function BranchForm({
   branch,
   onSuccess,
@@ -189,13 +189,13 @@ function BranchForm({
     },
     onSuccess: () => {
       toast.success(
-        isNew ? 'Tu1ea1o chi nhu00e1nh thu00e0nh cu00f4ng!' : 'Cu1eadp nhu1eadt thu00e0nh cu00f4ng!',
+        isNew ? 'Tạo chi nhánh thành công!' : 'Cập nhật thành công!',
       );
       void queryClient.invalidateQueries({ queryKey: ['branches'] });
       onSuccess();
     },
     onError: () => {
-      toast.error('Lu01b0u thu1ea5t bu1ea1i. Vui lu00f2ng thu1eed lu1ea1i.');
+      toast.error('Lưu thất bại. Vui lòng thử lại.');
     },
   });
 
@@ -212,7 +212,7 @@ function BranchForm({
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200 shrink-0">
         <h2 className="text-h3">
-          {isNew ? 'Tu1ea1o chi nhu00e1nh mu1edbi' : 'Chu1ec9nh su1eeda chi nhu00e1nh'}
+          {isNew ? 'Tạo chi nhánh mới' : 'Chỉnh sửa chi nhánh'}
         </h2>
         <div className="flex items-center gap-2">
           <button
@@ -221,7 +221,7 @@ function BranchForm({
               setValue('is_active', !isActive, { shouldDirty: true })
             }
             className="flex items-center gap-1.5 text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
-            aria-label={isActive ? 'u0110ang hou1ea1t u0111u1ed9ng' : 'Khu00f4ng hou1ea1t u0111u1ed9ng'}
+            aria-label={isActive ? 'Đang hoạt động' : 'Không hoạt động'}
           >
             {isActive ? (
               <ToggleRight
@@ -231,7 +231,7 @@ function BranchForm({
             ) : (
               <ToggleLeft className="w-5 h-5 text-neutral-400" aria-hidden="true" />
             )}
-            {isActive ? 'Hou1ea1t u0111u1ed9ng' : 'Khu00f4ng hou1ea1t u0111u1ed9ng'}
+            {isActive ? 'Hoạt động' : 'Không hoạt động'}
           </button>
         </div>
       </div>
@@ -242,7 +242,7 @@ function BranchForm({
           {/* Code */}
           <div>
             <label htmlFor="code" className="label">
-              Mu00e3 chi nhu00e1nh <span className="text-danger-base">*</span>
+              Mã chi nhánh <span className="text-danger-base">*</span>
             </label>
             <input
               id="code"
@@ -259,13 +259,13 @@ function BranchForm({
           {/* Name */}
           <div>
             <label htmlFor="name" className="label">
-              Tu00ean chi nhu00e1nh <span className="text-danger-base">*</span>
+              Tên chi nhánh <span className="text-danger-base">*</span>
             </label>
             <input
               id="name"
               type="text"
               className={cn('input', errors.name && 'ring-2 ring-danger-base')}
-              placeholder="HDB Chi nhu00e1nh Quu1eadn 1"
+              placeholder="HDB Chi nhánh Quận 1"
               {...register('name')}
             />
             {errors.name && (
@@ -277,13 +277,13 @@ function BranchForm({
         {/* Address */}
         <div>
           <label htmlFor="address" className="label">
-            u0110u1ecba chu1ec9 <span className="text-danger-base">*</span>
+            Địa chỉ <span className="text-danger-base">*</span>
           </label>
           <input
             id="address"
             type="text"
             className={cn('input', errors.address && 'ring-2 ring-danger-base')}
-            placeholder="123 Nguyu1ec5n Huu1ec7 Hu1ed1 Cu00f4ng Minh, Quu1eadn 1"
+            placeholder="123 Nguyễn Huệ Hố Công Minh, Quận 1"
             {...register('address')}
           />
           {errors.address && (
@@ -293,11 +293,11 @@ function BranchForm({
 
         {/* GPS Coordinates */}
         <div>
-          <p className="label mb-2">Tu1ecda u0111u1ed9 GPS</p>
+          <p className="label mb-2">Tọa độ GPS</p>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="latitude" className="label text-xs">
-                Vu0129 u0111u1ed9 (Latitude) <span className="text-danger-base">*</span>
+                Vĩ độ (Latitude) <span className="text-danger-base">*</span>
               </label>
               <input
                 id="latitude"
@@ -316,7 +316,7 @@ function BranchForm({
             </div>
             <div>
               <label htmlFor="longitude" className="label text-xs">
-                Kinh u0111u1ed9 (Longitude) <span className="text-danger-base">*</span>
+                Kinh độ (Longitude) <span className="text-danger-base">*</span>
               </label>
               <input
                 id="longitude"
@@ -339,7 +339,7 @@ function BranchForm({
         {/* Radius */}
         <div>
           <label htmlFor="radius_meters" className="label">
-            Bu00e1n ku00ednh Geofence:{' '}
+            Bán kính Geofence:{' '}
             <span className="font-mono text-primary-600">{radiusValue}m</span>
           </label>
           <div className="flex items-center gap-3">
@@ -358,7 +358,7 @@ function BranchForm({
               max={5000}
               className="input w-24 font-mono"
               {...register('radius_meters', { valueAsNumber: true })}
-              aria-label="Bu00e1n ku00ednh (mu00e9t)"
+              aria-label="Bán kính (mét)"
             />
           </div>
           {errors.radius_meters && (
@@ -374,7 +374,7 @@ function BranchForm({
                 className="inline-block w-4 h-4 mr-1 text-neutral-500"
                 aria-hidden="true"
               />
-              Danh su00e1ch WiFi BSSID
+              Danh sách WiFi BSSID
             </label>
             <button
               type="button"
@@ -382,7 +382,7 @@ function BranchForm({
               className="text-xs text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
             >
               <Plus className="w-3.5 h-3.5" aria-hidden="true" />
-              Thu00eam BSSID
+              Thêm BSSID
             </button>
           </div>
 
@@ -404,7 +404,7 @@ function BranchForm({
                     type="button"
                     onClick={() => remove(index)}
                     className="p-2 text-neutral-400 hover:text-danger-base transition-colors mt-0.5"
-                    aria-label={`Xu00f3a BSSID ${index + 1}`}
+                    aria-label={`Xóa BSSID ${index + 1}`}
                   >
                     <Trash2 className="w-4 h-4" aria-hidden="true" />
                   </button>
@@ -413,7 +413,7 @@ function BranchForm({
             ))}
             {errors.wifi_bssids && (
               <p className="field-error">
-                {errors.wifi_bssids.root?.message ?? 'Vui lu00f2ng kiu1ec3m tra BSSID'}
+                {errors.wifi_bssids.root?.message ?? 'Vui lòng kiểm tra BSSID'}
               </p>
             )}
           </div>
@@ -424,7 +424,7 @@ function BranchForm({
           <label htmlFor="telegram_chat_id" className="label">
             Telegram Chat ID
             <span className="ml-1 text-xs text-neutral-400 font-normal">
-              (tu00f9y chu1ecdn)
+              (tùy chọn)
             </span>
           </label>
           <input
@@ -447,12 +447,12 @@ function BranchForm({
           {isPending ? (
             <span className="flex items-center gap-2">
               <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              u0110ang lu01b0u...
+              Đang lưu...
             </span>
           ) : (
             <span className="flex items-center gap-2">
               <Save className="w-4 h-4" aria-hidden="true" />
-              {isNew ? 'Tu1ea1o chi nhu00e1nh' : 'Lu01b0u thu00e0y u0111u1ed5i'}
+              {isNew ? 'Tạo chi nhánh' : 'Lưu thày đổi'}
             </span>
           )}
         </button>
@@ -461,7 +461,7 @@ function BranchForm({
   );
 }
 
-// u2500u2500 Page u2500u2500
+// ── Page ──
 export function BranchConfigPage(): JSX.Element {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -500,10 +500,10 @@ export function BranchConfigPage(): JSX.Element {
   return (
     <div className="space-y-4">
       <div className="page-header">
-        <h1 className="text-h1">Cu1ea5u hu00ecnh chi nhu00e1nh</h1>
+        <h1 className="text-h1">Cấu hình chi nhánh</h1>
         <button type="button" onClick={handleNew} className="btn-primary">
           <Plus className="w-4 h-4" aria-hidden="true" />
-          Tu1ea1o mu1edbi
+          Tạo mới
         </button>
       </div>
 
@@ -518,11 +518,11 @@ export function BranchConfigPage(): JSX.Element {
               />
               <input
                 type="text"
-                placeholder="Tu00ecm chi nhu00e1nh..."
+                placeholder="Tìm chi nhánh..."
                 className="input pl-8 text-sm"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                aria-label="Tu00ecm kiu1ebfm chi nhu00e1nh"
+                aria-label="Tìm kiếm chi nhánh"
               />
             </div>
           </div>
@@ -540,7 +540,7 @@ export function BranchConfigPage(): JSX.Element {
                   aria-hidden="true"
                 />
                 <p className="text-sm text-neutral-500 text-center">
-                  {search ? 'Khu00f4ng tu00ecm thu1ea5y' : 'Chu01b0a cu00f3 chi nhu00e1nh'}
+                  {search ? 'Không tìm thấy' : 'Chưa có chi nhánh'}
                 </p>
               </div>
             ) : (
@@ -570,7 +570,7 @@ export function BranchConfigPage(): JSX.Element {
                 aria-hidden="true"
               />
               <p className="text-neutral-500 text-sm">
-                Chu1ecdn chu1ecdn hu00e0ng bu00ean tru00e1i u0111u1ec3 xu00e3i
+                Chọn chọn hàng bên trái để xãi
               </p>
             </div>
           )}

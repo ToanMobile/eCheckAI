@@ -65,10 +65,10 @@ export function formatRelativeDate(iso: string): string {
     yesterday.setDate(yesterday.getDate() - 1);
 
     if (format(date, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd')) {
-      return 'Hu00f4m nay';
+      return 'Hôm nay';
     }
     if (format(date, 'yyyy-MM-dd') === format(yesterday, 'yyyy-MM-dd')) {
-      return 'Hu00f4m qua';
+      return 'Hôm qua';
     }
     return formatDate(iso);
   } catch {
@@ -116,8 +116,8 @@ export function getRoleLabel(role: string): string {
   const map: Record<string, string> = {
     super_admin: 'Super Admin',
     hr: 'HR',
-    branch_manager: 'Quu1ea3n lu00fd chi nhu00e1nh',
-    employee: 'Nhu00e2n viu00ean',
+    branch_manager: 'Quản lý chi nhánh',
+    employee: 'Nhân viên',
   };
   return map[role] ?? role;
 }

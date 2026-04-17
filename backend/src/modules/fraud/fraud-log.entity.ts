@@ -54,7 +54,7 @@ export class FraudLog {
   @Column({ name: 'details', type: 'jsonb', default: {} })
   details!: Record<string, unknown>;
 
-  @Column({ name: 'ip_address', length: 45, nullable: true })
+  @Column({ name: 'ip_address', length: 45, nullable: true, type: 'varchar' })
   ipAddress!: string | null;
 
   @Column({ name: 'resolved_at', type: 'timestamptz', nullable: true })
@@ -65,9 +65,6 @@ export class FraudLog {
 
   @Column({ name: 'resolution_note', type: 'text', nullable: true })
   resolutionNote!: string | null;
-
-  @Column({ name: 'branch_id', type: 'uuid', nullable: true })
-  branchId!: string | null;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt!: Date;

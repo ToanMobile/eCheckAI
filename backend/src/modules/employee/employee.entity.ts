@@ -25,19 +25,19 @@ export class Employee {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ name: 'employee_code', unique: true, length: 20 })
+  @Column({ name: 'employee_code', unique: true, length: 50 })
   employeeCode!: string;
 
-  @Column({ name: 'full_name', length: 100 })
+  @Column({ name: 'full_name', length: 255 })
   fullName!: string;
 
-  @Column({ unique: true, length: 150 })
+  @Column({ unique: true, length: 255 })
   email!: string;
 
   @Column({ name: 'password_hash', length: 255 })
   passwordHash!: string;
 
-  @Column({ name: 'phone_number', nullable: true, length: 20 })
+  @Column({ name: 'phone', nullable: true, type: 'varchar', length: 20 })
   phoneNumber!: string | null;
 
   @Column({
@@ -50,7 +50,6 @@ export class Employee {
   @Column({ name: 'branch_id', nullable: true, type: 'uuid' })
   branchId!: string | null;
 
-  // Relationship loaded lazily - avoid circular import issues
   @ManyToOne('Branch', 'employees', {
     nullable: true,
     onDelete: 'SET NULL',
@@ -62,8 +61,17 @@ export class Employee {
   @OneToMany('AttendanceRecord', 'employee', { lazy: true })
   attendanceRecords!: Promise<unknown[]>;
 
-  @Column({ name: 'registered_device_id', nullable: true, length: 255 })
+  @Column({ name: 'registered_device_id', nullable: true, type: 'varchar', length: 255 })
   registeredDeviceId!: string | null;
+
+  @Column({ name: 'device_registered_at', nullable: true, type: 'timestamptz' })
+  deviceRegisteredAt!: Date | null;
+
+  @Column({ name: 'refresh_token_hash', nullable: true, type: 'varchar', length: 255 })
+  refreshTokenHash!: string | null;
+
+  @Column({ name: 'refresh_token_expires', nullable: true, type: 'timestamptz' })
+  refreshTokenExpires!: Date | null;
 
   @Column({ name: 'is_active', default: true })
   isActive!: boolean;
@@ -71,18 +79,12 @@ export class Employee {
   @Column({ name: 'last_login_at', nullable: true, type: 'timestamptz' })
   lastLoginAt!: Date | null;
 
-  @Column({ name: 'otp_code', nullable: true, length: 10 })
-  otpCode!: string | null;
-
-  @Column({ name: 'otp_expires_at', nullable: true, type: 'timestamptz' })
-  otpExpiresAt!: Date | null;
+  @Column({ name: 'deleted_at', nullable: true, type: 'timestamptz' })
+  deletedAt!: Date | null;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt!: Date;
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt!: Date;
-
-  @Column({ name: 'deleted_at', nullable: true, type: 'timestamptz' })
-  deletedAt!: Date | null;
 }

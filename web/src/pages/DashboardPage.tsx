@@ -23,9 +23,9 @@ import { useAttendanceStore } from '@/store/attendance.store';
 import { formatTime } from '@/lib/utils';
 import type { DashboardStats } from '@/types';
 
-// u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500
+// ────────────────────────────────────────────────────────────────
 // Data fetching
-// u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500
+// ────────────────────────────────────────────────────────────────
 
 async function fetchDashboardStats(): Promise<DashboardStats> {
   const { data } = await api.get<{ data: DashboardStats }>(
@@ -34,9 +34,9 @@ async function fetchDashboardStats(): Promise<DashboardStats> {
   return data.data;
 }
 
-// u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500
+// ────────────────────────────────────────────────────────────────
 // Chart tooltip
-// u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500
+// ────────────────────────────────────────────────────────────────
 
 function CustomTooltip({
   active,
@@ -66,9 +66,9 @@ function CustomTooltip({
   );
 }
 
-// u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500
+// ────────────────────────────────────────────────────────────────
 // Live feed
-// u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500
+// ────────────────────────────────────────────────────────────────
 
 function LiveFeed(): JSX.Element {
   const recentCheckins = useAttendanceStore((s) => s.recentCheckins);
@@ -77,11 +77,11 @@ function LiveFeed(): JSX.Element {
     <div className="card">
       <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200">
         <h3 className="text-base font-semibold text-neutral-950">
-          Lu01b0u1ee3t chu1ea5m cu00f4ng mu1edbi nhu1ea5t
+          Lượt chấm công mới nhất
         </h3>
         <span className="flex items-center gap-1.5 text-xs text-success-text">
           <span className="w-2 h-2 rounded-full bg-success-base animate-pulse" />
-          Tru1ef1c tiu1ebfp
+          Trực tiếp
         </span>
       </div>
 
@@ -93,7 +93,7 @@ function LiveFeed(): JSX.Element {
               aria-hidden="true"
             />
             <p className="text-sm text-neutral-500">
-              Chu01b0a cu00f3 lu01b0u1ee3t chu1ea5m cu00f4ng hu00f4m nay
+              Chưa có lượt chấm công hôm nay
             </p>
           </div>
         ) : (
@@ -136,9 +136,9 @@ function LiveFeed(): JSX.Element {
   );
 }
 
-// u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500
+// ────────────────────────────────────────────────────────────────
 // Dashboard page
-// u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500
+// ────────────────────────────────────────────────────────────────
 
 export function DashboardPage(): JSX.Element {
   const liveStats = useAttendanceStore((s) => s.liveStats);
@@ -188,28 +188,28 @@ export function DashboardPage(): JSX.Element {
       {/* Stats cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <StatsCard
-          label="Tu1ed5ng nhu00e2n viu00ean"
+          label="Tổng nhân viên"
           value={stats?.total ?? 0}
           icon={Users}
           loading={isLoading && !stats}
           iconClassName="bg-info-bg text-info-base"
         />
         <StatsCard
-          label="u0110u00fang giu1edd"
+          label="Đúng giờ"
           value={stats?.onTime ?? 0}
           icon={CheckCircle2}
           loading={isLoading && !stats}
           iconClassName="bg-success-bg text-success-base"
         />
         <StatsCard
-          label="u0110i muu1ed9n"
+          label="Đi muộn"
           value={stats?.late ?? 0}
           icon={Clock}
           loading={isLoading && !stats}
           iconClassName="bg-warning-bg text-warning-base"
         />
         <StatsCard
-          label="Vu1eafng mu1eb7t"
+          label="Vắng mặt"
           value={stats?.absent ?? 0}
           icon={XCircle}
           loading={isLoading && !stats}
@@ -223,10 +223,10 @@ export function DashboardPage(): JSX.Element {
         <div className="card p-5">
           <div className="flex items-center justify-between mb-5">
             <h3 className="text-base font-semibold text-neutral-950">
-              Xu xu01b0u1edbng chu1ea5m cu00f4ng 7 ngu00e0y
+              Xu xướng chấm công 7 ngày
             </h3>
             {isLoading && !data && (
-              <span className="text-xs text-neutral-400">u0110ang tu1ea3i...</span>
+              <span className="text-xs text-neutral-400">Đang tải...</span>
             )}
           </div>
 
@@ -276,7 +276,7 @@ export function DashboardPage(): JSX.Element {
                 <Area
                   type="monotone"
                   dataKey="on_time"
-                  name="u0110u00fang giu1edd"
+                  name="Đúng giờ"
                   stroke="#11A22F"
                   strokeWidth={2}
                   fill="url(#colorOnTime)"
@@ -285,7 +285,7 @@ export function DashboardPage(): JSX.Element {
                 <Area
                   type="monotone"
                   dataKey="late"
-                  name="Muu1ed9n"
+                  name="Muộn"
                   stroke="#EF9900"
                   strokeWidth={2}
                   fill="url(#colorLate)"
@@ -294,7 +294,7 @@ export function DashboardPage(): JSX.Element {
                 <Area
                   type="monotone"
                   dataKey="absent"
-                  name="Vu1eafng"
+                  name="Vắng"
                   stroke="#E7000B"
                   strokeWidth={2}
                   fill="url(#colorAbsent)"
@@ -314,7 +314,7 @@ export function DashboardPage(): JSX.Element {
         <div className="card p-5">
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-medium text-neutral-700">
-              Tu1ef7 lu1ec7 chu1ea5m cu00f4ng hu00f4m nay
+              Tỷ lệ chấm công hôm nay
             </p>
             <p className="text-sm font-semibold text-neutral-950">
               {stats.checkInRate.toFixed(1)}%
@@ -326,7 +326,7 @@ export function DashboardPage(): JSX.Element {
             aria-valuenow={stats.checkInRate}
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-label={`Tu1ef7 lu1ec7 chu1ea5m cu00f4ng: ${stats.checkInRate.toFixed(1)}%`}
+            aria-label={`Tỷ lệ chấm công: ${stats.checkInRate.toFixed(1)}%`}
           >
             <div
               className="h-full bg-primary-500 rounded-full transition-all duration-slow"

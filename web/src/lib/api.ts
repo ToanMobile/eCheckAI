@@ -149,7 +149,7 @@ api.interceptors.response.use(
                   .error as Record<string, unknown>
               ).message ?? error.message,
             )
-          : error.message ?? 'u0110u00e3 xu1ea3y ra lu1ed7i khu00f4ng xu00e1c u0111u1ecbnh',
+          : error.message ?? 'Đã xảy ra lỗi không xác định',
       status,
     };
 

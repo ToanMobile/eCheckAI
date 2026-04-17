@@ -39,7 +39,7 @@ export class EmployeeService {
   async findAll(
     query: PaginationQueryDto,
     scopedBranchId?: string | null,
-  ): Promise<PaginatedResult<Omit<Employee, 'passwordHash' | 'otpCode' | 'otpExpiresAt'>>> {
+  ): Promise<PaginatedResult<Omit<Employee, 'passwordHash'>>> {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
     const skip = (page - 1) * limit;
@@ -88,7 +88,7 @@ export class EmployeeService {
       .getManyAndCount();
 
     return {
-      items: items as Omit<Employee, 'passwordHash' | 'otpCode' | 'otpExpiresAt'>[],
+      items: items as Omit<Employee, 'passwordHash'>[],
       total,
       page,
       limit,
@@ -98,7 +98,7 @@ export class EmployeeService {
 
   async findOne(
     id: string,
-  ): Promise<Omit<Employee, 'passwordHash' | 'otpCode' | 'otpExpiresAt'>> {
+  ): Promise<Omit<Employee, 'passwordHash'>> {
     const employee = await this.employeeRepository.findOne({
       where: { id, deletedAt: IsNull() },
       select: [
@@ -119,10 +119,10 @@ export class EmployeeService {
     if (!employee) {
       throw new NotFoundException('EMPLOYEE_NOT_FOUND');
     }
-    return employee as Omit<Employee, 'passwordHash' | 'otpCode' | 'otpExpiresAt'>;
+    return employee as Omit<Employee, 'passwordHash'>;
   }
 
-  async create(dto: CreateEmployeeDto): Promise<Omit<Employee, 'passwordHash' | 'otpCode' | 'otpExpiresAt'>> {
+  async create(dto: CreateEmployeeDto): Promise<Omit<Employee, 'passwordHash'>> {
     const existingByEmail = await this.employeeRepository.findOne({
       where: { email: dto.email },
     });
@@ -157,7 +157,7 @@ export class EmployeeService {
   async update(
     id: string,
     dto: UpdateEmployeeDto,
-  ): Promise<Omit<Employee, 'passwordHash' | 'otpCode' | 'otpExpiresAt'>> {
+  ): Promise<Omit<Employee, 'passwordHash'>> {
     const employee = await this.employeeRepository.findOne({
       where: { id, deletedAt: IsNull() },
     });
@@ -267,5 +267,11 @@ export class EmployeeService {
     );
 
     return cacheData;
+  }
+
+  async countActive(): Promise<number> {
+    return this.employeeRepository.count({
+      where: { isActive: true, deletedAt: IsNull() },
+    });
   }
 }

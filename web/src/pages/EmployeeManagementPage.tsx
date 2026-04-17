@@ -37,20 +37,20 @@ import type {
 
 const PER_PAGE = 50;
 
-// u2500u2500 Schema u2500u2500
+// ── Schema ──
 const createEmployeeSchema = z.object({
-  employee_code: z.string().min(1, 'Mu00e3 nhu00e2n viu00ean khu00f4ng u0111u01b0u1ee3c u0111u1ec3 tru1ed1ng'),
-  full_name: z.string().min(1, 'Hu1ecd tu00ean khu00f4ng u0111u01b0u1ee3c u0111u1ec3 tru1ed1ng'),
-  email: z.string().email('Email khu00f4ng u0111u00fang u0111u1ecbnh du1ea1ng'),
+  employee_code: z.string().min(1, 'Mã nhân viên không được để trống'),
+  full_name: z.string().min(1, 'Họ tên không được để trống'),
+  email: z.string().email('Email không đúng định dạng'),
   phone: z.string().optional(),
   role: z.enum(['super_admin', 'hr', 'branch_manager', 'employee']),
   branch_id: z.string().optional(),
-  password: z.string().min(8, 'Mu1eadt khu1ea9u tu1ed1i thiu1ec3u 8 ku00fd tu1ef1'),
+  password: z.string().min(8, 'Mật khẩu tối thiểu 8 ký tự'),
 });
 
 type CreateEmployeeFormData = z.infer<typeof createEmployeeSchema>;
 
-// u2500u2500 API u2500u2500
+// ── API ──
 async function fetchEmployees(
   filters: EmployeeFilters,
 ): Promise<PaginatedResponse<Employee>['data']> {
@@ -62,7 +62,7 @@ async function fetchEmployees(
 
 async function fetchBranches(): Promise<Branch[]> {
   const { data } = await api.get<{ data: { items: Branch[] } }>('/branches', {
-    params: { per_page: 200 },
+    params: { limit: 200 },
   });
   return data.data.items;
 }
@@ -89,7 +89,7 @@ async function resetDevice(id: string): Promise<Employee> {
   return data.data;
 }
 
-// u2500u2500 Sort header u2500u2500
+// ── Sort header ──
 function SortHeader({
   label,
   sorted,
@@ -117,7 +117,7 @@ function SortHeader({
   );
 }
 
-// u2500u2500 Create Employee Dialog u2500u2500
+// ── Create Employee Dialog ──
 function CreateEmployeeDialog({
   branches,
   onClose,
@@ -152,11 +152,11 @@ function CreateEmployeeDialog({
       return createEmployee(dto);
     },
     onSuccess: () => {
-      toast.success('Tu1ea1o nhu00e2n viu00ean thu00e0nh cu00f4ng!');
+      toast.success('Tạo nhân viên thành công!');
       void queryClient.invalidateQueries({ queryKey: ['employees'] });
       onClose();
     },
-    onError: () => toast.error('Tu1ea1o thu1ea5t bu1ea1i'),
+    onError: () => toast.error('Tạo thất bại'),
   });
 
   return (
@@ -169,15 +169,15 @@ function CreateEmployeeDialog({
       <div className="bg-white rounded-xl shadow-lg w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200 sticky top-0 bg-white z-10">
           <h2 id="create-employee-title" className="text-h3">
-            Tu1ea1o nhu00e2n viu00ean mu1edbi
+            Tạo nhân viên mới
           </h2>
           <button
             type="button"
             onClick={onClose}
             className="text-neutral-400 hover:text-neutral-700 text-xl leading-none"
-            aria-label="u0110u00f3ng"
+            aria-label="Đóng"
           >
-            u00d7
+            ×
           </button>
         </div>
 
@@ -189,7 +189,7 @@ function CreateEmployeeDialog({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="emp-code" className="label">
-                Mu00e3 NV <span className="text-danger-base">*</span>
+                Mã NV <span className="text-danger-base">*</span>
               </label>
               <input
                 id="emp-code"
@@ -202,7 +202,7 @@ function CreateEmployeeDialog({
 
             <div>
               <label htmlFor="emp-phone" className="label">
-                Su1ed1 u0111iu1ec7n thou1ea1i
+                Số điện thoại
               </label>
               <input
                 id="emp-phone"
@@ -216,12 +216,12 @@ function CreateEmployeeDialog({
 
           <div>
             <label htmlFor="emp-name" className="label">
-              Hu1ecd tu00ean <span className="text-danger-base">*</span>
+              Họ tên <span className="text-danger-base">*</span>
             </label>
             <input
               id="emp-name"
               className={cn('input', errors.full_name && 'ring-2 ring-danger-base')}
-              placeholder="Nguyu1ec5n Vu0103n A"
+              placeholder="Nguyễn Văn A"
               {...register('full_name')}
             />
             {errors.full_name && <p className="field-error">{errors.full_name.message}</p>}
@@ -244,15 +244,15 @@ function CreateEmployeeDialog({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="emp-role" className="label">
-                Vai tru00f2 <span className="text-danger-base">*</span>
+                Vai trò <span className="text-danger-base">*</span>
               </label>
               <select
                 id="emp-role"
                 className="input"
                 {...register('role')}
               >
-                <option value="employee">Nhu00e2n viu00ean</option>
-                <option value="branch_manager">Quu1ea3n lu00fd CN</option>
+                <option value="employee">Nhân viên</option>
+                <option value="branch_manager">Quản lý CN</option>
                 <option value="hr">HR</option>
                 <option value="super_admin">Super Admin</option>
               </select>
@@ -260,14 +260,14 @@ function CreateEmployeeDialog({
 
             <div>
               <label htmlFor="emp-branch" className="label">
-                Chi nhu00e1nh
+                Chi nhánh
               </label>
               <select
                 id="emp-branch"
                 className="input"
                 {...register('branch_id')}
               >
-                <option value="">Chu01b0a gu00e1n chi nhu00e1nh</option>
+                <option value="">Chưa gán chi nhánh</option>
                 {branches.map((b) => (
                   <option key={b.id} value={b.id}>
                     {b.name}
@@ -279,13 +279,13 @@ function CreateEmployeeDialog({
 
           <div>
             <label htmlFor="emp-password" className="label">
-              Mu1eadt khu1ea9u <span className="text-danger-base">*</span>
+              Mật khẩu <span className="text-danger-base">*</span>
             </label>
             <input
               id="emp-password"
               type="password"
               className={cn('input', errors.password && 'ring-2 ring-danger-base')}
-              placeholder="Tu1ed1i thiu1ec3u 8 ku00fd tu1ef1"
+              placeholder="Tối thiểu 8 ký tự"
               {...register('password')}
             />
             {errors.password && <p className="field-error">{errors.password.message}</p>}
@@ -293,16 +293,16 @@ function CreateEmployeeDialog({
 
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" onClick={onClose} className="btn-secondary">
-              Hu1ee7y
+              Hủy
             </button>
             <button type="submit" disabled={isPending} className="btn-primary">
               {isPending ? (
                 <span className="flex items-center gap-2">
                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  u0110ang tu1ea1o...
+                  Đang tạo...
                 </span>
               ) : (
-                'Tu1ea1o nhu00e2n viu00ean'
+                'Tạo nhân viên'
               )}
             </button>
           </div>
@@ -312,7 +312,7 @@ function CreateEmployeeDialog({
   );
 }
 
-// u2500u2500 Row actions u2500u2500
+// ── Row actions ──
 function EmployeeActions({
   employee,
 }: {
@@ -324,7 +324,7 @@ function EmployeeActions({
     mutationFn: () => toggleEmployeeStatus(employee.id, !employee.is_active),
     onSuccess: () => {
       toast.success(
-        employee.is_active ? 'u0110u00e3 vu00f4 hou1ea1t hu00f3a tu00e0i khou1ea3n' : 'u0110u00e3 kou00edch hou1ea1t tu00e0i khou1ea3n',
+        employee.is_active ? 'Đã vô hoạt hóa tài khoản' : 'Đã koích hoạt tài khoản',
       );
       void queryClient.invalidateQueries({ queryKey: ['employees'] });
     },
@@ -333,7 +333,7 @@ function EmployeeActions({
   const { mutate: doResetDevice, isPending: isResetting } = useMutation({
     mutationFn: () => resetDevice(employee.id),
     onSuccess: () => {
-      toast.success('u0110u00e3 xo00e1 u0111u0103ng ku00fd thiu1ebft bu1ecb');
+      toast.success('Đã xo00e1 đăng ký thiết bị');
       void queryClient.invalidateQueries({ queryKey: ['employees'] });
     },
   });
@@ -350,9 +350,9 @@ function EmployeeActions({
             ? 'text-danger-base hover:bg-danger-bg'
             : 'text-success-base hover:bg-success-bg',
         )}
-        title={employee.is_active ? 'Vu00f4 hou1ea1t hu00f3a' : 'Kou00edch hou1ea1t'}
+        title={employee.is_active ? 'Vô hoạt hóa' : 'Koích hoạt'}
         aria-label={
-          employee.is_active ? `Vu00f4 hou1ea1t hu00f3a ${employee.full_name}` : `Kou00edch hou1ea1t ${employee.full_name}`
+          employee.is_active ? `Vô hoạt hóa ${employee.full_name}` : `Koích hoạt ${employee.full_name}`
         }
       >
         {employee.is_active ? (
@@ -368,8 +368,8 @@ function EmployeeActions({
           onClick={() => doResetDevice()}
           disabled={isResetting}
           className="p-1.5 rounded-lg text-neutral-400 hover:bg-warning-bg hover:text-warning-text transition-colors"
-          title="Xo00f3a u0111u0103ng ku00fd thiu1ebft bu1ecb"
-          aria-label={`Xu00f3a u0111u0103ng ku00fd thiu1ebft bu1ecb cu1ee7a ${employee.full_name}`}
+          title="Xo00f3a đăng ký thiết bị"
+          aria-label={`Xóa đăng ký thiết bị của ${employee.full_name}`}
         >
           <Smartphone className="w-4 h-4" aria-hidden="true" />
         </button>
@@ -378,12 +378,12 @@ function EmployeeActions({
   );
 }
 
-// u2500u2500 Columns u2500u2500
+// ── Columns ──
 function buildColumns(): ColumnDef<Employee>[] {
   return [
     {
       accessorKey: 'employee_code',
-      header: 'Mu00e3 NV',
+      header: 'Mã NV',
       cell: ({ getValue }) => (
         <span className="font-mono text-xs text-neutral-600">
           {String(getValue())}
@@ -393,7 +393,7 @@ function buildColumns(): ColumnDef<Employee>[] {
     },
     {
       accessorKey: 'full_name',
-      header: 'Hu1ecd tu00ean',
+      header: 'Họ tên',
       cell: ({ getValue }) => (
         <span className="font-medium text-neutral-950">{String(getValue())}</span>
       ),
@@ -406,23 +406,23 @@ function buildColumns(): ColumnDef<Employee>[] {
     },
     {
       accessorKey: 'branch_name',
-      header: 'Chi nhu00e1nh',
+      header: 'Chi nhánh',
       cell: ({ getValue }) => (
         <span className="text-neutral-600 text-sm">
-          {String(getValue() ?? 'u2014')}
+          {String(getValue() ?? '—')}
         </span>
       ),
       size: 160,
     },
     {
       accessorKey: 'role',
-      header: 'Vai tru00f2',
+      header: 'Vai trò',
       cell: ({ getValue }) => <RoleBadge role={String(getValue())} />,
       size: 130,
     },
     {
       id: 'status',
-      header: 'Tru1ea1ng thu00e1i',
+      header: 'Trạng thái',
       cell: ({ row }) => (
         <span
           className={cn(
@@ -432,14 +432,14 @@ function buildColumns(): ColumnDef<Employee>[] {
               : 'bg-neutral-100 text-neutral-500',
           )}
         >
-          {row.original.is_active ? 'Hou1ea1t u0111u1ed9ng' : 'Vu00f4 hou1ea1t hu00f3a'}
+          {row.original.is_active ? 'Hoạt động' : 'Vô hoạt hóa'}
         </span>
       ),
       size: 110,
     },
     {
       id: 'device',
-      header: 'Thiu1ebft bu1ecb',
+      header: 'Thiết bị',
       cell: ({ row }) => (
         <span
           className={cn(
@@ -450,7 +450,7 @@ function buildColumns(): ColumnDef<Employee>[] {
           )}
         >
           <Smartphone className="w-3.5 h-3.5" aria-hidden="true" />
-          {row.original.registered_device_id ? 'u0110u00e3 u0111u0103ng ku00fd' : 'Chu01b0a u0111u0103ng ku00fd'}
+          {row.original.registered_device_id ? 'Đã đăng ký' : 'Chưa đăng ký'}
         </span>
       ),
       size: 120,
@@ -464,7 +464,7 @@ function buildColumns(): ColumnDef<Employee>[] {
   ];
 }
 
-// u2500u2500 Page u2500u2500
+// ── Page ──
 export function EmployeeManagementPage(): JSX.Element {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [page, setPage] = useState(1);
@@ -479,7 +479,7 @@ export function EmployeeManagementPage(): JSX.Element {
   const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: ['employees', filters, page],
     queryFn: () =>
-      fetchEmployees({ ...filters, page, per_page: PER_PAGE }),
+      fetchEmployees({ ...filters, page, limit: PER_PAGE }),
     placeholderData: (prev) => prev,
   });
 
@@ -498,19 +498,19 @@ export function EmployeeManagementPage(): JSX.Element {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
-    pageCount: data?.total_pages ?? 1,
+    pageCount: data?.totalPages ?? 1,
   });
 
-  const totalPages = data?.total_pages ?? 1;
+  const totalPages = data?.totalPages ?? 1;
 
   return (
     <div className="space-y-5">
       {/* Header */}
       <div className="page-header">
         <div>
-          <h1 className="text-h1">Nhu00e2n viu00ean</h1>
+          <h1 className="text-h1">Nhân viên</h1>
           <p className="text-body-sm mt-1">
-            {data ? `${data.total.toLocaleString('vi-VN')} nhu00e2n viu00ean` : 'u0110ang tu1ea3i...'}
+            {data ? `${data.total.toLocaleString('vi-VN')} nhân viên` : 'Đang tải...'}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -524,7 +524,7 @@ export function EmployeeManagementPage(): JSX.Element {
               className={cn('w-4 h-4', isFetching && 'animate-spin')}
               aria-hidden="true"
             />
-            Lu00e0m mu1edbi
+            Làm mới
           </button>
           <button
             type="button"
@@ -532,7 +532,7 @@ export function EmployeeManagementPage(): JSX.Element {
             className="btn-primary"
           >
             <Plus className="w-4 h-4" aria-hidden="true" />
-            Tu1ea1o nhu00e2n viu00ean
+            Tạo nhân viên
           </button>
         </div>
       </div>
@@ -548,13 +548,13 @@ export function EmployeeManagementPage(): JSX.Element {
             />
             <input
               type="text"
-              placeholder="Tu00ecm nhu00e2n viu00ean..."
+              placeholder="Tìm nhân viên..."
               className="input pl-8"
               value={filters.search ?? ''}
               onChange={(e) =>
                 setFilters((prev) => ({ ...prev, search: e.target.value }))
               }
-              aria-label="Tu00ecm kiu1ebfm"
+              aria-label="Tìm kiếm"
             />
           </div>
 
@@ -565,9 +565,9 @@ export function EmployeeManagementPage(): JSX.Element {
             onChange={(e) =>
               setFilters((prev) => ({ ...prev, branch_id: e.target.value || undefined }))
             }
-            aria-label="Chi nhu00e1nh"
+            aria-label="Chi nhánh"
           >
-            <option value="">Tu1ea5t cu1ea3 chi nhu00e1nh</option>
+            <option value="">Tất cả chi nhánh</option>
             {branches.map((b) => (
               <option key={b.id} value={b.id}>
                 {b.name}
@@ -582,11 +582,11 @@ export function EmployeeManagementPage(): JSX.Element {
             onChange={(e) =>
               setFilters((prev) => ({ ...prev, role: (e.target.value as UserRole) || undefined }))
             }
-            aria-label="Vai tru00f2"
+            aria-label="Vai trò"
           >
-            <option value="">Tu1ea5t cu1ea3 vai tru00f2</option>
-            <option value="employee">Nhu00e2n viu00ean</option>
-            <option value="branch_manager">Quu1ea3n lu00fd CN</option>
+            <option value="">Tất cả vai trò</option>
+            <option value="employee">Nhân viên</option>
+            <option value="branch_manager">Quản lý CN</option>
             <option value="hr">HR</option>
             <option value="super_admin">Super Admin</option>
           </select>
@@ -602,11 +602,11 @@ export function EmployeeManagementPage(): JSX.Element {
                   e.target.value === '' ? undefined : e.target.value === 'true',
               }))
             }
-            aria-label="Tru1ea1ng thu00e1i"
+            aria-label="Trạng thái"
           >
-            <option value="">Tu1ea5t cu1ea3 tru1ea1ng thu00e1i</option>
-            <option value="true">Hou1ea1t u0111u1ed9ng</option>
-            <option value="false">Vu00f4 hou1ea1t hu00f3a</option>
+            <option value="">Tất cả trạng thái</option>
+            <option value="true">Hoạt động</option>
+            <option value="false">Vô hoạt hóa</option>
           </select>
         </div>
       </div>
@@ -666,7 +666,7 @@ export function EmployeeManagementPage(): JSX.Element {
                     colSpan={columns.length}
                     className="px-4 py-16 text-center text-sm text-neutral-500"
                   >
-                    Khu00f4ng cu00f3 nhu00e2n viu00ean nu00e0o
+                    Không có nhân viên nào
                   </td>
                 </tr>
               ) : (
@@ -696,17 +696,17 @@ export function EmployeeManagementPage(): JSX.Element {
         {/* Pagination */}
         <div className="flex items-center justify-between px-4 py-3 border-t border-neutral-200">
           <p className="text-sm text-neutral-500">
-            Hiu1ec3n thu1ecb{' '}
+            Hiển thị{' '}
             <span className="font-medium text-neutral-700">
               {data
-                ? `${(page - 1) * PER_PAGE + 1}u2013${Math.min(page * PER_PAGE, data.total)}`
+                ? `${(page - 1) * PER_PAGE + 1}–${Math.min(page * PER_PAGE, data.total)}`
                 : '0'}
             </span>{' '}
             trong{' '}
             <span className="font-medium text-neutral-700">
               {data?.total.toLocaleString('vi-VN') ?? 0}
             </span>{' '}
-            nhu00e2n viu00ean
+            nhân viên
           </p>
           <div className="flex items-center gap-1">
             <button
@@ -715,7 +715,7 @@ export function EmployeeManagementPage(): JSX.Element {
               disabled={page === 1}
               className="btn-secondary px-2 py-1.5 text-xs disabled:opacity-40"
             >
-              u00ab
+              «
             </button>
             <button
               type="button"
@@ -723,7 +723,7 @@ export function EmployeeManagementPage(): JSX.Element {
               disabled={page === 1}
               className="btn-secondary px-2 py-1.5 text-xs disabled:opacity-40"
             >
-              u2039
+              ‹
             </button>
             <span className="px-3 py-1.5 text-sm text-neutral-700">
               {page} / {totalPages}
@@ -734,7 +734,7 @@ export function EmployeeManagementPage(): JSX.Element {
               disabled={page >= totalPages}
               className="btn-secondary px-2 py-1.5 text-xs disabled:opacity-40"
             >
-              u203a
+              ›
             </button>
             <button
               type="button"
@@ -742,7 +742,7 @@ export function EmployeeManagementPage(): JSX.Element {
               disabled={page >= totalPages}
               className="btn-secondary px-2 py-1.5 text-xs disabled:opacity-40"
             >
-              u00bb
+              »
             </button>
           </div>
         </div>

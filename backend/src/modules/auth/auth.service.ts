@@ -99,7 +99,7 @@ export class AuthService {
       throw new UnauthorizedException('DEVICE_NOT_REGISTERED');
     }
 
-    const tokens = await this.generateTokens(employee, dto.device_id);
+    const tokens = await this.generateTokens(employee, dto.device_id ?? 'web');
 
     // Update last login
     await this.employeeRepository.update(employee.id, {
@@ -252,11 +252,7 @@ export class AuthService {
       otp,
     );
 
-    // Store in DB as backup
-    await this.employeeRepository.update(employee.id, {
-      otpCode: otp,
-      otpExpiresAt: new Date(Date.now() + RedisTTL.OTP * 1000),
-    });
+    // OTP stored in Redis only (no DB backup needed)
 
     // TODO: integrate with NotificationService to send email
     // await this.notificationService.sendPasswordResetEmail(dto.email, otp);
@@ -280,11 +276,7 @@ export class AuthService {
     }
 
     const passwordHash = await bcrypt.hash(dto.new_password, BCRYPT_ROUNDS);
-    await this.employeeRepository.update(employee.id, {
-      passwordHash,
-      otpCode: null,
-      otpExpiresAt: null,
-    });
+    await this.employeeRepository.update(employee.id, { passwordHash });
 
     // Invalidate OTP
     await this.redis.del(RedisKeys.otpToken(dto.email));
@@ -332,7 +324,7 @@ export class AuthService {
    */
   async getMe(
     employeeId: string,
-  ): Promise<Omit<Employee, 'passwordHash' | 'otpCode' | 'otpExpiresAt'>> {
+  ): Promise<Omit<Employee, 'passwordHash'>> {
     const employee = await this.employeeRepository.findOne({
       where: { id: employeeId },
       select: [

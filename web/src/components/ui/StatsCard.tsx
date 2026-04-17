@@ -6,7 +6,7 @@ interface StatsCardProps {
   label: string;
   value: number | string;
   delta?: number;        // positive = increase, negative = decrease (percentage)
-  deltaLabel?: string;   // e.g., "so vu1edbi hu00f4m qua"
+  deltaLabel?: string;   // e.g., "so với hôm qua"
   icon: LucideIcon;
   iconClassName?: string;
   loading?: boolean;
@@ -17,7 +17,7 @@ export function StatsCard({
   label,
   value,
   delta,
-  deltaLabel = 'so vu1edbi hu00f4m qua',
+  deltaLabel = 'so với hôm qua',
   icon: Icon,
   iconClassName,
   loading = false,
@@ -91,7 +91,7 @@ export function StatsCard({
               'text-neutral-500': isNeutral,
             })}
           >
-            {isNeutral ? 'Khu00f4ng thu1ea3y u0111u1ed5i' : formatDelta(delta!)}
+            {isNeutral ? 'Không thảy đổi' : formatDelta(delta!)}
           </span>
           {deltaLabel && (
             <span className="text-xs text-neutral-400">{deltaLabel}</span>

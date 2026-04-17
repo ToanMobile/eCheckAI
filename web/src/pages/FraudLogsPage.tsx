@@ -32,30 +32,30 @@ import type {
 const PER_PAGE = 50;
 
 const SEVERITY_OPTIONS: { value: string; label: string }[] = [
-  { value: '', label: 'Tu1ea5t cu1ea3 mu1ee9c u0111u1ed9' },
-  { value: 'critical', label: 'Nghu01b0u1ee1m tru1ecdng' },
+  { value: '', label: 'Tất cả mức độ' },
+  { value: 'critical', label: 'Nghưỡm trọng' },
   { value: 'high', label: 'Cao' },
-  { value: 'medium', label: 'Trung bu00ecnh' },
-  { value: 'low', label: 'Thu1ea5p' },
+  { value: 'medium', label: 'Trung bình' },
+  { value: 'low', label: 'Thấp' },
 ];
 
 const TYPE_OPTIONS: { value: string; label: string }[] = [
-  { value: '', label: 'Tu1ea5t cu1ea3 lou1ea1i' },
-  { value: 'DEVICE_MISMATCH', label: 'Sai thiu1ebft bu1ecb' },
-  { value: 'VPN_DETECTED', label: 'Du00f9ng VPN' },
-  { value: 'MOCK_LOCATION', label: 'Giu1ea3 vu1ecb tru00ed' },
-  { value: 'OUTSIDE_GEOFENCE', label: 'Ngou00e0i vu00f9ng' },
+  { value: '', label: 'Tất cả loại' },
+  { value: 'DEVICE_MISMATCH', label: 'Sai thiết bị' },
+  { value: 'VPN_DETECTED', label: 'Dùng VPN' },
+  { value: 'MOCK_LOCATION', label: 'Giả vị trí' },
+  { value: 'OUTSIDE_GEOFENCE', label: 'Ngoài vùng' },
   { value: 'WIFI_MISMATCH', label: 'Sai WiFi' },
-  { value: 'OUTSIDE_SCHEDULE', label: 'Ngou00e0i giu1edd' },
-  { value: 'RATE_LIMIT_EXCEEDED', label: 'Vu01b0u1ee3t giu1edbi hu1ea1n' },
-  { value: 'GPS_INACCURATE', label: 'GPS khu00f4ng chu00ednh xu00e1c' },
+  { value: 'OUTSIDE_SCHEDULE', label: 'Ngoài giờ' },
+  { value: 'RATE_LIMIT_EXCEEDED', label: 'Vượt giới hạn' },
+  { value: 'GPS_INACCURATE', label: 'GPS không chính xác' },
 ];
 
-// u2500u2500 API u2500u2500
+// ── API ──
 async function fetchFraudLogs(
   filters: FraudFilters,
 ): Promise<PaginatedResponse<FraudLog>['data']> {
-  const { data } = await api.get<PaginatedResponse<FraudLog>>('/fraud', {
+  const { data } = await api.get<PaginatedResponse<FraudLog>>('/fraud/logs', {
     params: filters,
   });
   return data.data;
@@ -66,13 +66,13 @@ async function resolveFraud(
   note: string,
 ): Promise<FraudLog> {
   const { data } = await api.patch<{ data: FraudLog }>(
-    `/fraud/${id}/resolve`,
+    `/fraud/logs/${id}/resolve`,
     { resolution_note: note },
   );
   return data.data;
 }
 
-// u2500u2500 Detail Modal u2500u2500
+// ── Detail Modal ──
 function FraudDetailModal({
   fraud,
   onClose,
@@ -86,11 +86,11 @@ function FraudDetailModal({
   const { mutate, isPending } = useMutation({
     mutationFn: () => resolveFraud(fraud.id, resolutionNote),
     onSuccess: () => {
-      toast.success('u0110u00e3 xu1eed lu00fd bu00e1o cu00e1o gian lu1eadn');
+      toast.success('Đã xử lý báo cáo gian lận');
       void queryClient.invalidateQueries({ queryKey: ['fraud-logs'] });
       onClose();
     },
-    onError: () => toast.error('Xu1eed lu00fd thu1ea5t bu1ea1i'),
+    onError: () => toast.error('Xử lý thất bại'),
   });
 
   return (
@@ -113,10 +113,10 @@ function FraudDetailModal({
             />
             <div>
               <h2 id="fraud-modal-title" className="text-base font-semibold text-neutral-950">
-                Chi tiu1ebft gian lu1eadn
+                Chi tiết gian lận
               </h2>
               <p className="text-xs text-neutral-500">
-                {fraud.full_name} u2014 {fraud.branch_name}
+                {fraud.full_name} — {fraud.branch_name}
               </p>
             </div>
           </div>
@@ -124,9 +124,9 @@ function FraudDetailModal({
             type="button"
             onClick={onClose}
             className="text-neutral-400 hover:text-neutral-700 text-xl leading-none"
-            aria-label="u0110u00f3ng"
+            aria-label="Đóng"
           >
-            u00d7
+            ×
           </button>
         </div>
 
@@ -141,21 +141,21 @@ function FraudDetailModal({
             {fraud.is_resolved && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-bg text-success-text">
                 <CheckCircle2 className="w-3 h-3" aria-hidden="true" />
-                u0110u00e3 xu1eed lu00fd
+                Đã xử lý
               </span>
             )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-neutral-50 rounded-lg p-3">
-              <p className="text-xs text-neutral-500 mb-0.5">Nhu00e2n viu00ean</p>
+              <p className="text-xs text-neutral-500 mb-0.5">Nhân viên</p>
               <p className="text-sm font-medium">{fraud.full_name}</p>
               <p className="font-mono text-xs text-neutral-500">
                 {fraud.employee_code}
               </p>
             </div>
             <div className="bg-neutral-50 rounded-lg p-3">
-              <p className="text-xs text-neutral-500 mb-0.5">Thu1eddi gian</p>
+              <p className="text-xs text-neutral-500 mb-0.5">Thời gian</p>
               <p className="font-mono text-sm">
                 {formatDatetime(fraud.created_at)}
               </p>
@@ -170,7 +170,7 @@ function FraudDetailModal({
                 aria-hidden="true"
               />
               <h3 className="text-sm font-semibold text-neutral-950">
-                Thu00f4ng tin thiu1ebft bu1ecb
+                Thông tin thiết bị
               </h3>
             </div>
             <div className="bg-neutral-50 rounded-lg p-4 space-y-2">
@@ -203,7 +203,7 @@ function FraudDetailModal({
                 aria-hidden="true"
               />
               <h3 className="text-sm font-semibold text-neutral-950">
-                Thu00f4ng tin vu1ecb tru00ed
+                Thông tin vị trí
               </h3>
             </div>
             <div className="bg-neutral-50 rounded-lg p-4 space-y-2">
@@ -232,13 +232,13 @@ function FraudDetailModal({
           {!fraud.is_resolved && (
             <div>
               <label htmlFor="resolution-note" className="label">
-                Ghi chu00fa xu1eed lu00fd
+                Ghi chú xử lý
               </label>
               <textarea
                 id="resolution-note"
                 className="input resize-none"
                 rows={3}
-                placeholder="Mou00f4 tu1ea3 nu1ed9i dung xu1eed lu00fd..."
+                placeholder="Moô tả nội dung xử lý..."
                 value={resolutionNote}
                 onChange={(e) => setResolutionNote(e.target.value)}
               />
@@ -249,7 +249,7 @@ function FraudDetailModal({
           {fraud.is_resolved && (
             <div className="bg-success-bg border border-success-base/20 rounded-lg p-4">
               <p className="text-xs font-medium text-success-text mb-1">
-                u0110u00e3 xu1eed lu00fd bu1edfi {fraud.resolved_by} lu00fac{' '}
+                Đã xử lý bởi {fraud.resolved_by} lúc{' '}
                 {fraud.resolved_at ? formatDatetime(fraud.resolved_at) : 'N/A'}
               </p>
               {fraud.resolution_note && (
@@ -263,7 +263,7 @@ function FraudDetailModal({
         {!fraud.is_resolved && (
           <div className="px-6 py-4 border-t border-neutral-200 shrink-0 flex justify-end gap-2">
             <button type="button" onClick={onClose} className="btn-secondary">
-              u0110u00f3ng
+              Đóng
             </button>
             <button
               type="button"
@@ -274,12 +274,12 @@ function FraudDetailModal({
               {isPending ? (
                 <span className="flex items-center gap-2">
                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  u0110ang xu1eed lu00fd...
+                  Đang xử lý...
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
-                  Xu00e1c nhu1eadn u0111u00e3 xu1eed lu00fd
+                  Xác nhận đã xử lý
                 </span>
               )}
             </button>
@@ -290,7 +290,7 @@ function FraudDetailModal({
   );
 }
 
-// u2500u2500 Sort header u2500u2500
+// ── Sort header ──
 function SortHeader({
   label,
   sorted,
@@ -318,11 +318,11 @@ function SortHeader({
   );
 }
 
-// u2500u2500 Columns u2500u2500
+// ── Columns ──
 const FRAUD_COLUMNS: ColumnDef<FraudLog>[] = [
   {
     accessorKey: 'severity',
-    header: 'Mu1ee9c u0111u1ed9',
+    header: 'Mức độ',
     cell: ({ getValue }) => (
       <SeverityBadge severity={getValue() as FraudSeverity} />
     ),
@@ -330,7 +330,7 @@ const FRAUD_COLUMNS: ColumnDef<FraudLog>[] = [
   },
   {
     accessorKey: 'employee_code',
-    header: 'Mu00e3 NV',
+    header: 'Mã NV',
     cell: ({ getValue }) => (
       <span className="font-mono text-xs">{String(getValue())}</span>
     ),
@@ -338,7 +338,7 @@ const FRAUD_COLUMNS: ColumnDef<FraudLog>[] = [
   },
   {
     accessorKey: 'full_name',
-    header: 'Hu1ecd tu00ean',
+    header: 'Họ tên',
     cell: ({ getValue }) => (
       <span className="font-medium">{String(getValue())}</span>
     ),
@@ -346,12 +346,12 @@ const FRAUD_COLUMNS: ColumnDef<FraudLog>[] = [
   },
   {
     accessorKey: 'branch_name',
-    header: 'Chi nhu00e1nh',
+    header: 'Chi nhánh',
     size: 150,
   },
   {
     accessorKey: 'type',
-    header: 'Lou1ea1i',
+    header: 'Loại',
     cell: ({ getValue }) => (
       <span className="font-mono text-xs bg-neutral-100 px-1.5 py-0.5 rounded text-neutral-700">
         {String(getValue())}
@@ -361,7 +361,7 @@ const FRAUD_COLUMNS: ColumnDef<FraudLog>[] = [
   },
   {
     accessorKey: 'created_at',
-    header: 'Thu1eddi gian',
+    header: 'Thời gian',
     cell: ({ getValue }) => (
       <span className="font-mono text-xs text-neutral-600">
         {formatDatetime(String(getValue()))}
@@ -371,7 +371,7 @@ const FRAUD_COLUMNS: ColumnDef<FraudLog>[] = [
   },
   {
     accessorKey: 'is_resolved',
-    header: 'Tru1ea1ng thu00e1i',
+    header: 'Trạng thái',
     cell: ({ getValue }) => (
       <span
         className={cn(
@@ -384,10 +384,10 @@ const FRAUD_COLUMNS: ColumnDef<FraudLog>[] = [
         {getValue() ? (
           <>
             <CheckCircle2 className="w-3 h-3" aria-hidden="true" />
-            u0110u00e3 xu1eed lu00fd
+            Đã xử lý
           </>
         ) : (
-          'Chu01b0a xu1eed lu00fd'
+          'Chưa xử lý'
         )}
       </span>
     ),
@@ -395,7 +395,7 @@ const FRAUD_COLUMNS: ColumnDef<FraudLog>[] = [
   },
 ];
 
-// u2500u2500 Page u2500u2500
+// ── Page ──
 export function FraudLogsPage(): JSX.Element {
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'severity', desc: false }, // critical first (alphabetical: critical < high < low < medium)
@@ -407,7 +407,7 @@ export function FraudLogsPage(): JSX.Element {
   const { data, isLoading } = useQuery({
     queryKey: ['fraud-logs', filters, page],
     queryFn: () =>
-      fetchFraudLogs({ ...filters, page, per_page: PER_PAGE }),
+      fetchFraudLogs({ ...filters, page, limit: PER_PAGE }),
     placeholderData: (prev) => prev,
   });
 
@@ -419,19 +419,19 @@ export function FraudLogsPage(): JSX.Element {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
-    pageCount: data?.total_pages ?? 1,
+    pageCount: data?.totalPages ?? 1,
   });
 
-  const totalPages = data?.total_pages ?? 1;
+  const totalPages = data?.totalPages ?? 1;
 
   return (
     <div className="space-y-5">
       {/* Header */}
       <div className="page-header">
         <div>
-          <h1 className="text-h1">Phu00e1t hiu1ec7n gian lu1eadn</h1>
+          <h1 className="text-h1">Phát hiện gian lận</h1>
           <p className="text-body-sm mt-1">
-            {data ? `${data.total.toLocaleString('vi-VN')} bu00e1o cu00e1o` : 'u0110ang tu1ea3i...'}
+            {data ? `${data.total.toLocaleString('vi-VN')} báo cáo` : 'Đang tải...'}
           </p>
         </div>
       </div>
@@ -449,7 +449,7 @@ export function FraudLogsPage(): JSX.Element {
                 severity: (e.target.value as FraudSeverity) || undefined,
               }))
             }
-            aria-label="Mu1ee9c u0111u1ed9"
+            aria-label="Mức độ"
           >
             {SEVERITY_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -468,7 +468,7 @@ export function FraudLogsPage(): JSX.Element {
                 type: (e.target.value as FraudType) || undefined,
               }))
             }
-            aria-label="Lou1ea1i gian lu1eadn"
+            aria-label="Loại gian lận"
           >
             {TYPE_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -488,7 +488,7 @@ export function FraudLogsPage(): JSX.Element {
                 date_from: e.target.value || undefined,
               }))
             }
-            aria-label="Tu1eeb ngu00e0y"
+            aria-label="Từ ngày"
           />
 
           {/* Date to */}
@@ -502,7 +502,7 @@ export function FraudLogsPage(): JSX.Element {
                 date_to: e.target.value || undefined,
               }))
             }
-            aria-label="u0110u1ebfn ngu00e0y"
+            aria-label="Đến ngày"
           />
 
           {/* Resolved */}
@@ -516,11 +516,11 @@ export function FraudLogsPage(): JSX.Element {
                   e.target.value === '' ? undefined : e.target.value === 'true',
               }))
             }
-            aria-label="Tru1ea1ng thu00e1i xu1eed lu00fd"
+            aria-label="Trạng thái xử lý"
           >
-            <option value="">Tu1ea5t cu1ea3</option>
-            <option value="false">Chu01b0a xu1eed lu00fd</option>
-            <option value="true">u0110u00e3 xu1eed lu00fd</option>
+            <option value="">Tất cả</option>
+            <option value="false">Chưa xử lý</option>
+            <option value="true">Đã xử lý</option>
           </select>
         </div>
       </div>
@@ -582,7 +582,7 @@ export function FraudLogsPage(): JSX.Element {
                     colSpan={FRAUD_COLUMNS.length}
                     className="px-4 py-16 text-center text-sm text-neutral-500"
                   >
-                    Khu00f4ng cu00f3 bu00e1o cu00e1o gian lu1eadn
+                    Không có báo cáo gian lận
                   </td>
                 </tr>
               ) : (
@@ -598,7 +598,7 @@ export function FraudLogsPage(): JSX.Element {
                         setSelectedFraud(row.original);
                       }
                     }}
-                    aria-label={`Xem chi tiu1ebft: ${row.original.full_name} u2014 ${row.original.type}`}
+                    aria-label={`Xem chi tiết: ${row.original.full_name} — ${row.original.type}`}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <td
@@ -622,7 +622,7 @@ export function FraudLogsPage(): JSX.Element {
         <div className="flex items-center justify-between px-4 py-3 border-t border-neutral-200">
           <p className="text-sm text-neutral-500">
             {data
-              ? `${(page - 1) * PER_PAGE + 1}u2013${Math.min(page * PER_PAGE, data.total)} trong ${data.total.toLocaleString('vi-VN')}`
+              ? `${(page - 1) * PER_PAGE + 1}–${Math.min(page * PER_PAGE, data.total)} trong ${data.total.toLocaleString('vi-VN')}`
               : '0'}
           </p>
           <div className="flex items-center gap-1">
@@ -632,7 +632,7 @@ export function FraudLogsPage(): JSX.Element {
               disabled={page === 1}
               className="btn-secondary px-2 py-1.5 text-xs disabled:opacity-40"
             >
-              u00ab
+              «
             </button>
             <button
               type="button"
@@ -640,7 +640,7 @@ export function FraudLogsPage(): JSX.Element {
               disabled={page === 1}
               className="btn-secondary px-2 py-1.5 text-xs disabled:opacity-40"
             >
-              u2039
+              ‹
             </button>
             <span className="px-3 py-1.5 text-sm text-neutral-700">
               {page} / {totalPages}
@@ -651,7 +651,7 @@ export function FraudLogsPage(): JSX.Element {
               disabled={page >= totalPages}
               className="btn-secondary px-2 py-1.5 text-xs disabled:opacity-40"
             >
-              u203a
+              ›
             </button>
             <button
               type="button"
@@ -659,7 +659,7 @@ export function FraudLogsPage(): JSX.Element {
               disabled={page >= totalPages}
               className="btn-secondary px-2 py-1.5 text-xs disabled:opacity-40"
             >
-              u00bb
+              »
             </button>
           </div>
         </div>

@@ -27,13 +27,13 @@ export const useAuthStore = create<AuthStore>()(
       isAuthenticated: false,
 
       login: (data: LoginResponse) => {
-        localStorage.setItem('access_token', data.access_token);
-        localStorage.setItem('refresh_token', data.refresh_token);
+        localStorage.setItem('access_token', data.accessToken);
+        localStorage.setItem('refresh_token', data.refreshToken);
 
         set({
-          user: data.user,
-          accessToken: data.access_token,
-          refreshToken: data.refresh_token,
+          user: data.employee as unknown as User,
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
           isAuthenticated: true,
         });
       },

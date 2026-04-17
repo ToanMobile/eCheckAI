@@ -61,16 +61,9 @@ export class FraudController {
     if (resolvedRaw === 'true') resolved = true;
     else if (resolvedRaw === 'false') resolved = false;
 
-    // BranchScopeGuard injects scopedBranchId:
-    //   - branch_manager => their own branchId (mandatory)
-    //   - hr / super_admin => query param value or null (all branches)
-    const effectiveBranchId =
-      req.scopedBranchId !== undefined
-        ? (req.scopedBranchId ?? undefined)
-        : branchId;
+    void req; void branchId; // branch_id not in fraud_logs schema
 
     const query: FraudLogQueryDto = {
-      branchId: effectiveBranchId,
       severity,
       fraudType,
       resolved,

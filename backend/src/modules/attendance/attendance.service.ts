@@ -465,34 +465,55 @@ export class AttendanceService {
 
   async getStats(
     branchId?: string,
-    dateFrom?: string,
-    dateTo?: string,
+    _dateFrom?: string,
+    _dateTo?: string,
   ): Promise<Record<string, unknown>> {
-    const qb = this.attendanceRepository.createQueryBuilder('ar');
+    const todayStr = new Date().toISOString().slice(0, 10);
 
-    if (branchId) {
-      qb.where('ar.branch_id = :branchId', { branchId });
-    }
-    if (dateFrom) {
-      qb.andWhere('ar.work_date >= :dateFrom', { dateFrom });
-    }
-    if (dateTo) {
-      qb.andWhere('ar.work_date <= :dateTo', { dateTo });
-    }
+    const baseQb = () => {
+      const qb = this.attendanceRepository.createQueryBuilder('ar');
+      if (branchId) qb.where('ar.branch_id = :branchId', { branchId });
+      return qb;
+    };
 
-    const [total, onTime, late, absent] = await Promise.all([
-      qb.getCount(),
-      qb.clone().andWhere('ar.status = :s', { s: AttendanceStatus.ON_TIME }).getCount(),
-      qb.clone().andWhere('ar.status = :s', { s: AttendanceStatus.LATE }).getCount(),
-      qb.clone().andWhere('ar.status = :s', { s: AttendanceStatus.ABSENT }).getCount(),
+    // Today stats
+    const todayQb = baseQb().andWhere('ar.work_date = :today', { today: todayStr });
+    const [totalToday, onTimeToday, lateToday, absentToday, totalEmployees] = await Promise.all([
+      todayQb.getCount(),
+      todayQb.clone().andWhere('ar.status = :s', { s: AttendanceStatus.ON_TIME }).getCount(),
+      todayQb.clone().andWhere('ar.status = :s', { s: AttendanceStatus.LATE }).getCount(),
+      todayQb.clone().andWhere('ar.status = :s', { s: AttendanceStatus.ABSENT }).getCount(),
+      this.employeeService.countActive(),
     ]);
 
+    // 7-day trend
+    const trend = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().slice(0, 10);
+      const label = d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+      const dayQb = baseQb().andWhere('ar.work_date = :d', { d: dateStr });
+      const [t, ot, lt, ab] = await Promise.all([
+        dayQb.getCount(),
+        dayQb.clone().andWhere('ar.status = :s', { s: AttendanceStatus.ON_TIME }).getCount(),
+        dayQb.clone().andWhere('ar.status = :s', { s: AttendanceStatus.LATE }).getCount(),
+        dayQb.clone().andWhere('ar.status = :s', { s: AttendanceStatus.ABSENT }).getCount(),
+      ]);
+      trend.push({ date: label, on_time: ot, late: lt, absent: ab, total: t });
+    }
+
     return {
-      total,
-      on_time: onTime,
-      late,
-      absent,
-      on_time_rate: total > 0 ? ((onTime / total) * 100).toFixed(1) : '0.0',
+      today: {
+        date: todayStr,
+        total_employees: totalEmployees,
+        total_checked_in: totalToday,
+        on_time: onTimeToday,
+        late: lateToday,
+        absent: absentToday,
+        check_in_rate: totalEmployees > 0 ? Math.round((totalToday / totalEmployees) * 100) : 0,
+      },
+      trend,
     };
   }
 }

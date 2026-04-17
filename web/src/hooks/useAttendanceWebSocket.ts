@@ -52,7 +52,7 @@ export function useAttendanceWebSocket(): UseAttendanceWebSocketReturn {
 
     socketRef.current = socket;
 
-    // u2500u2500 Connection lifecycle u2500u2500
+    // ── Connection lifecycle ──
     socket.on('connect', () => {
       setStatus('connected');
       reconnectAttempt.current = 0;
@@ -75,11 +75,11 @@ export function useAttendanceWebSocket(): UseAttendanceWebSocketReturn {
       scheduleReconnect();
     });
 
-    // u2500u2500 Domain events u2500u2500
+    // ── Domain events ──
     socket.on('attendance:checkin', (event: CheckinEvent) => {
       addCheckin(event);
       toast.success(
-        `u2705 ${event.full_name} u0111u00e3 check-in lu00fac ${new Date(event.timestamp).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`,
+        `✅ ${event.full_name} đã check-in lúc ${new Date(event.timestamp).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`,
         { description: event.branch_name },
       );
     });
@@ -87,7 +87,7 @@ export function useAttendanceWebSocket(): UseAttendanceWebSocketReturn {
     socket.on('attendance:checkout', (event: CheckinEvent) => {
       addCheckin({ ...event, type: 'checkout' });
       toast.info(
-        `u{1F44B} ${event.full_name} u0111u00e3 check-out lu00fac ${new Date(event.timestamp).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`,
+        `u{1F44B} ${event.full_name} đã check-out lúc ${new Date(event.timestamp).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`,
         { description: event.branch_name },
       );
     });
@@ -96,14 +96,14 @@ export function useAttendanceWebSocket(): UseAttendanceWebSocketReturn {
       addFraudAlert(event);
       const severityEmoji: Record<string, string> = {
         critical: 'u{1F6A8}',
-        high: 'u26A0uFE0F',
-        medium: 'u26A0uFE0F',
-        low: 'u2139uFE0F',
+        high: '⚠️',
+        medium: '⚠️',
+        low: 'ℹ️',
       };
       toast.error(
-        `${severityEmoji[event.severity] ?? 'u26A0uFE0F'} Phu00e1t hiu1ec7n gian lu1eadn: ${event.full_name}`,
+        `${severityEmoji[event.severity] ?? '⚠️'} Phát hiện gian lận: ${event.full_name}`,
         {
-          description: `${event.fraud_type} u2014 ${event.branch_name}`,
+          description: `${event.fraud_type} — ${event.branch_name}`,
           duration: 8000,
         },
       );
